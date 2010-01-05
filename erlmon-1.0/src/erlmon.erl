@@ -4,9 +4,12 @@
 
 -behaviour(application).
 
--export([start/2, stop/1]).
+-export([start/0, start/2, stop/1]).
 
-start(_Type, _StartArgs) ->
+start() ->
+	application:start(erlmon).
+
+start(Type, StartArgs) ->
 	debug:log_to(file, {filename, "erlmon.log"}),
 	debug:log("erlmon: initializing"),
 	erlmon_sup:start_link().
