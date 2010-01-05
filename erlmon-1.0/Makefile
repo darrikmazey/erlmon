@@ -19,4 +19,4 @@ clean:
 	rm -f erl_crash.dump
 
 shell:
-	$(ERL) -pa ebin/
+	$(ERL) -pa ebin/ -s erlmon

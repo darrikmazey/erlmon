@@ -9,7 +9,7 @@
 start() ->
 	application:start(erlmon).
 
-start(Type, StartArgs) ->
+start(_Type, _StartArgs) ->
 	debug:log_to(file, {filename, "erlmon.log"}),
 	debug:log("erlmon: initializing"),
 	erlmon_sup:start_link().
