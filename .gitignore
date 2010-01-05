@@ -1,0 +1,3 @@
+*.beam
+*.log
+*/src/test.erl
