@@ -1,4 +1,5 @@
 
+ERLMON=./erlmon
 ERL=erl
 ERLC=erlc
 ERLS=$(wildcard src/*.erl)
@@ -19,4 +20,5 @@ clean:
 	rm -f erl_crash.dump
 
 shell:
-	$(ERL) -pa ebin/ -s erlmon
+	$(ERLMON) node
+	#$(ERL) -pa ebin/ -s erlmon
