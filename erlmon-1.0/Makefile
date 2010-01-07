@@ -20,5 +20,5 @@ clean:
 	rm -f erl_crash.dump
 
 shell:
-	$(ERLMON) node
+	$(ERLMON) erlmon
 	#$(ERL) -pa ebin/ -s erlmon
