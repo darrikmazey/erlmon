@@ -13,7 +13,3 @@
 
 %% announce msg
 -record(msg_nodesrv_announce, {sender, node, nodesrv, nodelist=[]}).
-
-%% heartbeat msg
--record(msg_nodesrv_heartbeat, {sender, node, nodesrv, nodelist=[]}).
-

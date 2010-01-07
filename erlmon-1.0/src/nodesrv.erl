@@ -9,9 +9,10 @@
 -export([remove_node/1]).
 -export([list_nodes/0]).
 -export([declare_node/1]).
--export([heartbeat/2]).
 
 -include("include/nodesrv.hrl").
+
+-define(TIMEOUT, 30000).
 
 start() ->
 	Nodes = net_adm:world(),
@@ -25,7 +26,6 @@ init() ->
 init(Nodes) ->
 	debug:log("nodesrv: initializing with nodes (~p)", [Nodes]),
 	State = find_nodesrv_on_nodes(Nodes),
-	start_heartbeats(State),
 	announce(State),
 	debug:log("initial state: ~p", [State]),
 	loop(State).
@@ -45,12 +45,8 @@ loop(State) ->
 			loop(NewState);
 		#msg_nodesrv_announce{sender=Sender, node=Node, nodesrv=Nodesrv} ->
 			debug:log("received announce from ~p for ~p on ~p", [Sender, Nodesrv, Node]),
-			spawn(nodesrv, heartbeat, [Nodesrv, 10000]),
 			NewState = add_node_to_state(Node, State),
 			loop(NewState);
-		#msg_nodesrv_heartbeat{sender=Sender, node=Node, nodesrv=Nodesrv} ->
-			debug:log("received heartbeat from ~p for ~p on ~p", [Sender, Nodesrv, Node]),
-			loop(State);
 		_ -> loop(State)
 	end.
 
@@ -100,21 +96,3 @@ announce([{_Node, Pid}|T]) ->
 	announce(T);
 announce([]) -> ok.
 
-heartbeat(Pid, Timeout) ->
-	NPid = whereis(nodesrv),
-	receive
-	after
-		Timeout ->
-			case Pid of
-				NPid ->
-					ok;
-				_ ->
-					Pid ! #msg_nodesrv_heartbeat{sender=NPid, node=node(), nodesrv=whereis(nodesrv)},
-					heartbeat(Pid, Timeout)
-			end
-	end.
-
-start_heartbeats([{_Node, Nodesrv}|T]) ->
-	spawn(nodesrv,heartbeat, [Nodesrv, 10000]),
-	start_heartbeats(T);
-start_heartbeats([]) -> ok.
