@@ -9,6 +9,7 @@
 -export([remove_node/1]).
 -export([list_nodes/0]).
 -export([declare_node/1]).
+-export([heartbeat/2]).
 
 -include("include/nodesrv.hrl").
 
@@ -43,8 +44,12 @@ loop(State) ->
 			loop(NewState);
 		#msg_nodesrv_announce{sender=Sender, node=Node, nodesrv=Nodesrv} ->
 			debug:log("received announce from ~p for ~p on ~p", [Sender, Nodesrv, Node]),
+			spawn(nodesrv, heartbeat, [Nodesrv, 10000]),
 			NewState = add_node_to_state(Node, State),
 			loop(NewState);
+		#msg_nodesrv_heartbeat{sender=Sender, node=Node, nodesrv=Nodesrv} ->
+			debug:log("received heartbeat from ~p for ~p on ~p", [Sender, Nodesrv, Node]),
+			loop(State);
 		_ -> loop(State)
 	end.
 
@@ -93,3 +98,13 @@ announce([{_Node, Pid}|T]) ->
 	Pid ! #msg_nodesrv_announce{sender=self(), node=node(), nodesrv=whereis(nodesrv)},
 	announce(T);
 announce([]) -> ok.
+
+heartbeat(Pid, Timeout) ->
+	NPid = whereis(nodesrv),
+	receive
+	after
+		Timeout ->
+			Pid ! #msg_nodesrv_heartbeat{sender=NPid, node=node(), nodesrv=whereis(nodesrv)},
+			heartbeat(Pid, Timeout)
+	end.
+
