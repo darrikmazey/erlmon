@@ -8,7 +8,7 @@ EBEAMS=$(BEAMS:src/%=ebin/%)
 
 all: force
 
-force: compile shell
+force: compile
 compile: $(EBEAMS)
 
 ebin/%.beam: src/%.erl
