@@ -25,6 +25,7 @@ init() ->
 init(Nodes) ->
 	debug:log("nodesrv: initializing with nodes (~p)", [Nodes]),
 	State = find_nodesrv_on_nodes(Nodes),
+	start_heartbeats(State),
 	announce(State),
 	debug:log("initial state: ~p", [State]),
 	loop(State).
@@ -113,3 +114,7 @@ heartbeat(Pid, Timeout) ->
 			end
 	end.
 
+start_heartbeats([{_Node, Nodesrv}|T]) ->
+	spawn(nodesrv,heartbeat, [Nodesrv, 10000]),
+	start_heartbeats(T);
+start_heartbeats([]) -> ok.
