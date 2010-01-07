@@ -104,7 +104,12 @@ heartbeat(Pid, Timeout) ->
 	receive
 	after
 		Timeout ->
-			Pid ! #msg_nodesrv_heartbeat{sender=NPid, node=node(), nodesrv=whereis(nodesrv)},
-			heartbeat(Pid, Timeout)
+			case Pid of
+				NPid ->
+					ok;
+				_ ->
+					Pid ! #msg_nodesrv_heartbeat{sender=NPid, node=node(), nodesrv=whereis(nodesrv)},
+					heartbeat(Pid, Timeout)
+			end
 	end.
 
