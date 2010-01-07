@@ -11,7 +11,7 @@ start() ->
 
 start(_Type, _StartArgs) ->
 	debug:log_to(file, {filename, "erlmon.log"}),
-	debug:log_to(console, {}).
+	debug:log_to(console, {}),
 	debug:log("erlmon: initializing"),
 	erlmon_sup:start_link().
 
