@@ -16,12 +16,6 @@ start() ->
 
 init() ->
 	debug:log("node: initializing"),
-	case net_adm:ping(nodesrv@motherrussia.darmasoft.com) of
-		pong ->
-			debug:log("pong");
-		pang ->
-			debug:log("pang")
-	end,
 	loop([]).
 
 loop(State) ->
