@@ -12,8 +12,6 @@
 
 -include("include/nodesrv.hrl").
 
--define(TIMEOUT, 30000).
-
 start() ->
 	Nodes = net_adm:world(),
 	register(nodesrv, Pid = spawn_link(nodesrv, init, [Nodes])),
@@ -43,9 +41,9 @@ loop(State) ->
 			debug:log("received remove ~p from ~p", [Node, Sender]),
 			NewState = remove_node_from_state(Node, State),
 			loop(NewState);
-		#msg_nodesrv_announce{sender=Sender, node=Node, nodesrv=Nodesrv} ->
+		#msg_nodesrv_announce{sender=Sender, node=Node, nodesrv=Nodesrv, nodelist=NodeList} ->
 			debug:log("received announce from ~p for ~p on ~p", [Sender, Nodesrv, Node]),
-			NewState = add_node_to_state(Node, State),
+			NewState = add_nodes_to_state(NodeList, State),
 			loop(NewState);
 		_ -> loop(State)
 	end.
@@ -56,6 +54,12 @@ list_nodes() ->
 		#msg_nodesrv_node_list{sender=_Sender, nodes=NodeList} ->
 			NodeList
 	end.
+
+add_nodes_to_state([Node, T], State) ->
+	NewState = add_node_to_state(Node, State),
+	add_nodes_to_state(T, NewState);
+add_nodes_to_state([], _State) ->
+	ok.
 
 add_node(Node) when is_atom(Node) ->
 	nodesrv ! #msg_nodesrv_add_node{sender=self(), node=Node},
@@ -92,7 +96,7 @@ remove_node_from_state(Node, [H|T]) ->
 remove_node_from_state(_Node, []) -> [].
 
 announce([{_Node, Pid}|T]) ->
-	Pid ! #msg_nodesrv_announce{sender=self(), node=node(), nodesrv=whereis(nodesrv)},
+	Pid ! #msg_nodesrv_announce{sender=self(), node=node(), nodesrv=whereis(nodesrv), nodelist=list_nodes()},
 	announce(T);
 announce([]) -> ok.
 
