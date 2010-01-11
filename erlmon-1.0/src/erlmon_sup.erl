@@ -12,6 +12,5 @@ start_link() ->
 
 init(_) ->
 	debug:log("erlmon_sup: starting"),
-	NSChild = {nodesrv_sup, {nodesrv_sup, start_link, []}, permanent, 2000, supervisor, [nodesrv_sup]},
 	NChild = {node_sup, {node_sup, start_link, []}, permanent, 2000, supervisor, [node_sup]},
-	{ok, {{one_for_one, 1, 1}, [NSChild,NChild]}}.
+	{ok, {{one_for_one, 1, 1}, [NChild]}}.
