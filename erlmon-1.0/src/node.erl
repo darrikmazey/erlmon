@@ -9,7 +9,7 @@
 -include("include/state_mon.hrl").
 
 start() ->
-	register(?MODULE, Pid=spawn(?MODULE, init, [])),
+	register(?MODULE, Pid=spawn_link(?MODULE, init, [])),
 	{ok, Pid}.
 
 init() ->
