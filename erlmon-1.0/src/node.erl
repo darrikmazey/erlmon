@@ -16,16 +16,22 @@ init() ->
 	State = net_adm:world(),
 	debug:log("initial state: ~p", [State]),
 	NewState = start_monitoring_nodes(State),
-	announce(NewState),
+	announce(NewState, NewState),
 	debug:log("final state: ~p", [NewState]),
 	loop(NewState).
 
 loop(State) ->
 	debug:log("LOOP~n~p", [State]),
 	receive
-		#node_announce{sender=_Sender, pid=Pid, node=Node} ->
-			debug:log("received announce for ~p on ~p", [Pid, Node]),
+		#node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
+			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			NewState = set_node_up(Node, State),
+			case TheirState == NewState of
+				false ->
+					debug:log("different states!");
+				true ->
+					debug:log("same states!")
+			end,
 			loop(NewState);
 		{nodedown, Node} ->
 			debug:log("received nodedown for ~p", [Node]),
@@ -47,7 +53,7 @@ start_monitoring_node(Node) ->
 			debug:log("monitoring node: ~p", [Node]),
 			{Node, up};
 		true ->
-			{Node, self}
+			{Node, up}
 	end.
 
 set_node_down(Node, [{Node, up}|T]) ->
@@ -72,15 +78,17 @@ set_node_up(Node, [H|T]) ->
 set_node_up(Node, []) ->
 	[start_monitoring_node(Node)].
 
-announce([{_Node, self}|T]) ->
-	debug:log("not announcing to self"),
-	announce(T);
-announce([{Node, up}|T]) ->
-	Pid = find_node_pid(Node),
-	debug:log("announcing to ~p on ~p", [Pid, Node]),
-	Pid ! #node_announce{sender=self(), pid=self(), node=node()},
-	announce(T);
-announce([]) ->
+announce([{Node, up}|T], State) ->
+	case Node == node() of
+		false ->
+			Pid = find_node_pid(Node),
+			debug:log("announcing to ~p on ~p", [Pid, Node]),
+			Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State},
+			announce(T, State);
+		true ->
+			debug:log("not announcing to self")
+	end;
+announce([], _State) ->
 	[].
 
 find_node_pid(Node) when is_atom(Node) ->
