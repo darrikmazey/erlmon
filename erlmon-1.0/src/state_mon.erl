@@ -16,7 +16,6 @@ init() ->
 	loop([]).
 
 loop(State) ->
-	debug:log("LOOP~n~p", [State]),
 	receive
 		#state_change{sender=_Sender, objtype=ObjType, obj=Obj, prev_state=PrevState, new_state=NewState} ->
 			debug:log("~p:~p changed: ~p -> ~p", [ObjType, Obj, PrevState, NewState]),
@@ -25,4 +24,3 @@ loop(State) ->
 			debug:log("UNKNOWN: ~p", [M]),
 			loop(State)
 	end.
-
