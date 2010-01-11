@@ -6,6 +6,7 @@
 -export([init/0]).
 
 -include("include/node.hrl").
+-include("include/state_mon.hrl").
 
 start() ->
 	register(?MODULE, Pid=spawn(?MODULE, init, [])),
@@ -58,6 +59,7 @@ start_monitoring_node(Node) ->
 
 set_node_down(Node, [{Node, up}|T]) ->
 	debug:log("setting node down for ~p", [Node]),
+	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=up, new_state=down},
 	[{Node, down}|T];
 set_node_down(Node, [{Node, down}|T]) ->
 	debug:log("setting node down for ~p (already down)", [Node]),
@@ -65,10 +67,13 @@ set_node_down(Node, [{Node, down}|T]) ->
 set_node_down(Node, [H|T]) ->
 	[H|set_node_down(Node, T)];
 set_node_down(Node, []) ->
+	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=none, new_state=down},
 	[{Node, down}].
 
 set_node_up(Node, [{Node, down}|T]) ->
 	debug:log("setting node up for ~p", [Node]),
+	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=down, new_state=up},
+	start_monitoring_node(Node),
 	[{Node, up}|T];
 set_node_up(Node, [{Node, up}|T]) ->
 	debug:log("setting node up for ~p (already up)", [Node]),
@@ -76,6 +81,7 @@ set_node_up(Node, [{Node, up}|T]) ->
 set_node_up(Node, [H|T]) ->
 	[H|set_node_up(Node, T)];
 set_node_up(Node, []) ->
+	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=none, new_state=up},
 	[start_monitoring_node(Node)].
 
 announce([{Node, up}|T], State) ->

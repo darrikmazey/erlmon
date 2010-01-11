@@ -13,4 +13,5 @@ start_link() ->
 init(_) ->
 	debug:log("erlmon_sup: starting"),
 	NChild = {node_sup, {node_sup, start_link, []}, permanent, 2000, supervisor, [node_sup]},
-	{ok, {{one_for_one, 1, 1}, [NChild]}}.
+	SMChild = { state_mon_sup, {state_mon_sup, start_link, []}, permanent, 2000, supervisor, [state_mon_sup]},
+	{ok, {{one_for_one, 1, 1}, [SMChild, NChild]}}.
