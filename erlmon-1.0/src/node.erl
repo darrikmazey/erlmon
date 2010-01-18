@@ -24,8 +24,9 @@ init() ->
 loop(State) ->
 	debug:log("LOOP~n~p", [State]),
 	receive
-		#node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
+		_Msg = #node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
+			%storage:announce(Sender, Node),
 			NewState = set_node_up(Node, State),
 			case TheirState == NewState of
 				false ->
@@ -39,7 +40,7 @@ loop(State) ->
 			NewState = set_node_down(Node, State),
 			loop(NewState);
 		M ->
-			debug:log("UNKNOWN: ~p", [M]),
+			debug:log("node:UNKNOWN: ~p", [M]),
 			loop(State)
 	end.
 
@@ -59,7 +60,7 @@ start_monitoring_node(Node) ->
 
 set_node_down(Node, [{Node, up}|T]) ->
 	debug:log("setting node down for ~p", [Node]),
-	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=up, new_state=down},
+	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=up, new_state=down, ts=timestamp:now_i()},
 	[{Node, down}|T];
 set_node_down(Node, [{Node, down}|T]) ->
 	debug:log("setting node down for ~p (already down)", [Node]),
@@ -67,12 +68,12 @@ set_node_down(Node, [{Node, down}|T]) ->
 set_node_down(Node, [H|T]) ->
 	[H|set_node_down(Node, T)];
 set_node_down(Node, []) ->
-	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=none, new_state=down},
+	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=none, new_state=down, ts=timestamp:now_i()},
 	[{Node, down}].
 
 set_node_up(Node, [{Node, down}|T]) ->
 	debug:log("setting node up for ~p", [Node]),
-	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=down, new_state=up},
+	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=down, new_state=up, ts=timestamp:now_i()},
 	start_monitoring_node(Node),
 	[{Node, up}|T];
 set_node_up(Node, [{Node, up}|T]) ->
@@ -81,15 +82,20 @@ set_node_up(Node, [{Node, up}|T]) ->
 set_node_up(Node, [H|T]) ->
 	[H|set_node_up(Node, T)];
 set_node_up(Node, []) ->
-	state_mon ! #state_change{sender=self(), objtype=node, obj=Node, prev_state=none, new_state=up},
+	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=none, new_state=up, ts=timestamp:now_i()},
 	[start_monitoring_node(Node)].
 
 announce([{Node, up}|T], State) ->
 	case Node == node() of
 		false ->
 			Pid = find_node_pid(Node),
-			debug:log("announcing to ~p on ~p", [Pid, Node]),
-			Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State},
+			case Pid of
+				undefined ->
+					debug:log("can not announce to node ~p: undefined Pid", [Node]);
+				_ ->
+				debug:log("announcing to ~p on ~p", [Pid, Node]),
+				Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State}
+			end,
 			announce(T, State);
 		true ->
 			debug:log("not announcing to self")

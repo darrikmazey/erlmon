@@ -8,7 +8,7 @@
 -include("include/state_mon.hrl").
 
 start() ->
-	register(?MODULE, Pid=spawn(?MODULE, init, [])),
+	register(?MODULE, Pid=spawn_link(?MODULE, init, [])),
 	{ok, Pid}.
 
 init() ->
@@ -17,10 +17,11 @@ init() ->
 
 loop(State) ->
 	receive
-		#state_change{sender=_Sender, objtype=ObjType, obj=Obj, prev_state=PrevState, new_state=NewState} ->
+		_Msg = #state_change{sender=_Sender, node=_Node, objtype=ObjType, obj=Obj, prev_state=PrevState, new_state=NewState, ts=_TS} ->
 			debug:log("~p:~p changed: ~p -> ~p", [ObjType, Obj, PrevState, NewState]),
+			%storage:save_state_change(Msg),
 			loop(State);
 		M ->
-			debug:log("UNKNOWN: ~p", [M]),
+			debug:log("state_mon:UNKNOWN: ~p", [M]),
 			loop(State)
 	end.

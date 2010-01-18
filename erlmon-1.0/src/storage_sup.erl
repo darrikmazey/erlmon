@@ -1,5 +1,5 @@
 
--module(state_mon_sup).
+-module(storage_sup).
 -author(darrik@darmasoft.com).
 
 -behaviour(supervisor).
@@ -11,6 +11,6 @@ start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init(_) ->
-	debug:log("state_mon_sup: starting state_mon"),
-	Child = {state_mon, {state_mon, start, []}, permanent, 2000, worker, [state_mon]},
+	debug:log("storage_sup: starting storage"),
+	Child = {storage, {storage, start, []}, permanent, 2000, worker, [storage]},
 	{ok, {{one_for_one, 1, 1}, [Child]}}.

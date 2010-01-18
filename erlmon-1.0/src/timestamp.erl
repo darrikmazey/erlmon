@@ -3,6 +3,7 @@
 -author(darrik@darmasoft.com).
 
 -export([now/0]).
+-export([now_i/0]).
 
 now() ->
 	{Date, Time} = calendar:local_time(),
@@ -20,3 +21,7 @@ now() ->
 			integer_to_list(Mins),
 			":",
 			integer_to_list(Secs) ])).
+
+now_i() ->
+	{_, T, _} = erlang:now(),
+	T.
