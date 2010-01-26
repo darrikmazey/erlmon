@@ -5,7 +5,7 @@
 -export([start/0]).
 -export([init/0]).
 
--include("include/state_mon.hrl").
+-include("include/erlmon.hrl").
 
 start() ->
 	register(?MODULE, Pid=spawn_link(?MODULE, init, [])),

@@ -9,7 +9,7 @@
 
 -export([test/2]).
 
--include("include/storage.hrl").
+-include("include/erlmon.hrl").
 
 start() ->
 	debug:log_to(console, {}),
