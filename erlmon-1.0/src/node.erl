@@ -27,12 +27,6 @@ loop(State) ->
 			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			%storage:announce(Sender, Node),
 			NewState = set_node_up(Node, State),
-			case TheirState == NewState of
-				false ->
-					debug:log("different states!");
-				true ->
-					debug:log("same states!")
-			end,
 			loop(NewState);
 		{nodedown, Node} ->
 			debug:log("received nodedown for ~p", [Node]),
@@ -94,10 +88,12 @@ announce([{Node, up}|T], State) ->
 				_ ->
 				debug:log("announcing to ~p on ~p", [Pid, Node]),
 				Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State}
+				%state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=none, new_state=up, ts=timestamp:now_i()}
 			end,
 			announce(T, State);
 		true ->
-			debug:log("not announcing to self")
+			debug:log("not announcing to self"),
+			state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=node(), prev_state=down, new_state=up, ts=timestamp:now_i()}
 	end;
 announce([], _State) ->
 	[].

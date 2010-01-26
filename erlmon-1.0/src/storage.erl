@@ -7,6 +7,8 @@
 
 -export([announce/2]).
 
+-export([state_change/1]).
+
 -export([test/2]).
 
 -include("include/erlmon.hrl").
@@ -35,6 +37,10 @@ init() ->
 
 loop(State) ->
 	receive
+		Msg = #state_change{} ->
+			debug:log("storage: received state_change"),
+			store(Msg),
+			loop(State);
 		#storage_ack_announce{sender=Sender, node=Node} ->
 			debug:log("storage: received ACK announce from ~p on ~p", [Sender, Node]),
 			loop(State);
@@ -74,13 +80,15 @@ init_storage(true) ->
 	wait_for_tables().
 
 create_tables() ->
-	mnesia:create_table(test, [{attributes, record_info(fields, test)}, {type, bag}, {ram_copies, [node()]}]).
+	mnesia:create_table(test, [{attributes, record_info(fields, test)}, {type, bag}, {ram_copies, [node()]}]),
+	mnesia:create_table(state_change, [{attributes, record_info(fields, state_change)}, {type, bag}, {ram_copies, [node()]}]).
 
 copy_tables(Node) ->
-	_R1 = mnesia:add_table_copy(test, Node, ram_copies).
+	_R1 = mnesia:add_table_copy(test, Node, ram_copies),
+	_R2 = mnesia:add_table_copy(state_change, Node, ram_copies).
 
 wait_for_tables() ->
-	mnesia:wait_for_tables([test], 10000).
+	mnesia:wait_for_tables([test, state_change], 10000).
 	
 copy_storage_to_node(Node) ->
 	debug:log("storage: copying storage to ~p", [Node]),
@@ -95,3 +103,9 @@ test(K, V) ->
 	end,
 	mnesia:transaction(F).
 
+state_change(Msg) ->
+	storage ! Msg.
+
+store(Msg) ->
+	F = fun() -> mnesia:write(Msg) end,
+	mnesia:transaction(F).

@@ -17,9 +17,9 @@ init() ->
 
 loop(State) ->
 	receive
-		_Msg = #state_change{sender=_Sender, node=_Node, objtype=ObjType, obj=Obj, prev_state=PrevState, new_state=NewState, ts=_TS} ->
+		Msg = #state_change{sender=_Sender, node=_Node, objtype=ObjType, obj=Obj, prev_state=PrevState, new_state=NewState, ts=_TS} ->
 			debug:log("~p:~p changed: ~p -> ~p", [ObjType, Obj, PrevState, NewState]),
-			%storage:save_state_change(Msg),
+			storage:state_change(Msg),
 			loop(State);
 		M ->
 			debug:log("state_mon:UNKNOWN: ~p", [M]),
