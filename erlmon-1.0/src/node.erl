@@ -4,6 +4,7 @@
 
 -export([start/0]).
 -export([init/0]).
+-export([monitor_node/1]).
 
 -include("include/erlmon.hrl").
 
@@ -14,24 +15,16 @@ start() ->
 init() ->
 	debug:log("node: initializing"),
 	State = net_adm:world(),
-	debug:log("initial state: ~p", [State]),
 	NewState = start_monitoring_nodes(State),
 	announce(NewState, NewState),
-	debug:log("final state: ~p", [NewState]),
 	loop(NewState).
 
 loop(State) ->
-	debug:log("LOOP~n~p", [State]),
 	receive
 		_Msg = #node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
-			%storage:announce(Sender, Node),
-			NewState = set_node_up(Node, State),
-			loop(NewState);
-		{nodedown, Node} ->
-			debug:log("received nodedown for ~p", [Node]),
-			NewState = set_node_down(Node, State),
-			loop(NewState);
+			start_monitoring_node(Node),
+			loop(State);
 		M ->
 			debug:log("node:UNKNOWN: ~p", [M]),
 			loop(State)
@@ -44,39 +37,13 @@ start_monitoring_nodes([]) -> [].
 start_monitoring_node(Node) ->
 	case Node == node() of
 		false ->
-			erlang:monitor_node(Node, true),
-			debug:log("monitoring node: ~p", [Node]),
+			%erlang:monitor_node(Node, true),
+			%debug:log("monitoring node: ~p", [Node]),
+			spawn(node, monitor_node, [Node]),
 			{Node, up};
 		true ->
 			{Node, up}
 	end.
-
-set_node_down(Node, [{Node, up}|T]) ->
-	debug:log("setting node down for ~p", [Node]),
-	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=up, new_state=down, ts=timestamp:now_i()},
-	[{Node, down}|T];
-set_node_down(Node, [{Node, down}|T]) ->
-	debug:log("setting node down for ~p (already down)", [Node]),
-	[{Node, down}|T];
-set_node_down(Node, [H|T]) ->
-	[H|set_node_down(Node, T)];
-set_node_down(Node, []) ->
-	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=none, new_state=down, ts=timestamp:now_i()},
-	[{Node, down}].
-
-set_node_up(Node, [{Node, down}|T]) ->
-	debug:log("setting node up for ~p", [Node]),
-	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=down, new_state=up, ts=timestamp:now_i()},
-	start_monitoring_node(Node),
-	[{Node, up}|T];
-set_node_up(Node, [{Node, up}|T]) ->
-	debug:log("setting node up for ~p (already up)", [Node]),
-	[{Node, up}|T];
-set_node_up(Node, [H|T]) ->
-	[H|set_node_up(Node, T)];
-set_node_up(Node, []) ->
-	state_mon ! #state_change{sender=self(), node=node(), objtype=node, obj=Node, prev_state=none, new_state=up, ts=timestamp:now_i()},
-	[start_monitoring_node(Node)].
 
 announce([{Node, up}|T], State) ->
 	case Node == node() of
@@ -88,7 +55,6 @@ announce([{Node, up}|T], State) ->
 				_ ->
 				debug:log("announcing to ~p on ~p", [Pid, Node]),
 				Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State}
-				%state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=none, new_state=up, ts=timestamp:now_i()}
 			end,
 			announce(T, State);
 		true ->
@@ -100,3 +66,15 @@ announce([], _State) ->
 
 find_node_pid(Node) when is_atom(Node) ->
 	rpc:call(Node, erlang, whereis, [node]).
+
+monitor_node(Node) ->
+	debug:log("node: monitoring ~p (~p)", [Node, self()]),
+	state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=down, new_state=up, ts=timestamp:now_i()},
+	erlang:monitor_node(Node, true),
+	receive
+		{nodedown, Node} ->
+			debug:log("node: received nodedown for ~p (~p)", [Node, self()]),
+			state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=up, new_state=down, ts=timestamp:now_i()};
+		M ->
+			debug:log("node:UNKNOWN: ~p (~p)", [M, self()])
+	end.
