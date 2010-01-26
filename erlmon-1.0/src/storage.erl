@@ -69,15 +69,15 @@ init_storage(false) ->
 init_storage(true) ->
 	init_storage(false),
 	debug:log("storage: initializing schema"),
-	mnesia:change_table_copy_type(schema, node(), disc_copies),
+	mnesia:change_table_copy_type(schema, node(), ram_copies),
 	create_tables(),
 	wait_for_tables().
 
 create_tables() ->
-	mnesia:create_table(test, [{attributes, record_info(fields, test)}, {type, bag}, {disc_copies, [node()]}]).
+	mnesia:create_table(test, [{attributes, record_info(fields, test)}, {type, bag}, {ram_copies, [node()]}]).
 
 copy_tables(Node) ->
-	_R1 = mnesia:add_table_copy(test, Node, disc_copies).
+	_R1 = mnesia:add_table_copy(test, Node, ram_copies).
 
 wait_for_tables() ->
 	mnesia:wait_for_tables([test], 10000).
@@ -85,7 +85,7 @@ wait_for_tables() ->
 copy_storage_to_node(Node) ->
 	debug:log("storage: copying storage to ~p", [Node]),
 	_R1 = mnesia:change_config(extra_db_nodes, [Node]),
-	_R2 = mnesia:change_table_copy_type(schema, Node, disc_copies),
+	_R2 = mnesia:change_table_copy_type(schema, Node, ram_copies),
 	copy_tables(Node).
 
 test(K, V) ->
