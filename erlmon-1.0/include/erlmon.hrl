@@ -13,3 +13,7 @@
 
 %% test_row
 -record(test, {key, value}).
+
+%% process
+-record(process, {user, pid, cpu, mem, vsz, rss, tty, stat, start, time, cmd}).
+
