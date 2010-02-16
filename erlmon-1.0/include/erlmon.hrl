@@ -17,3 +17,5 @@
 %% process
 -record(process, {user, pid, cpu, mem, vsz, rss, tty, stat, start, time, cmd}).
 
+%% filesystem
+-record(filesystem, {path, size, used, avail, percent, mount}).
