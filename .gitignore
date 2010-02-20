@@ -3,3 +3,4 @@
 */src/test.erl
 *.dump
 */Mnesia*
+*.swp
