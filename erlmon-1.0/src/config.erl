@@ -12,6 +12,12 @@
 
 -record(state, {}).
 
+%% The config system is the glue between the lua configuration
+%% code and the Erlang system. The goal of the system is for 
+%% each piece to do as little as possible. In this case, the config
+%% system simply starts a special case file_monitor that watches the
+%% erlmon config file. When a change is detected the file is reloaded.
+
 %%====================================================================
 %% API
 %%====================================================================
@@ -20,11 +26,12 @@
 %% Description: Starts the server
 %%--------------------------------------------------------------------
 start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-%%====================================================================
-%% gen_server callbacks
-%%====================================================================
+%% TODO: Darrik this needs to pass a callback function, 
+%% i want to call config:handle_info/2 if the file changes
+%% file_monitor:start("erlmon.conf"),
+
+  gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 %%--------------------------------------------------------------------
 %% Function: init(Args) -> {ok, State} |
