@@ -1,5 +1,4 @@
 
-
 -- helper functions for monitors
 
 function _add(mtype,name,init)
@@ -9,7 +8,6 @@ function _add(mtype,name,init)
   if mlist[mtype] == nil then mlist[mtype] = {} end
 
   -- TODO - how do we handle the preexisting monitor? for now we just override it
-
   -- save new monitor
   mlist[mtype][name] = init
   
