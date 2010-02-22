@@ -1,7 +1,8 @@
 task :default => [:make_c, :make_erl]
 
-task :test => [:default, :tests] do
+task :test => [:default, :make_tests] do
   sh "erl -pa ebin -noshell -s lua_test test -s init stop"
+  sh "cd lua && ./lunit tests.lua"
 end
 
 task :clean do
