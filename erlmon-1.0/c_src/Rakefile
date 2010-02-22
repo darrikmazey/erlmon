@@ -29,7 +29,7 @@ file "../priv/lua_drv.so" => FILES.map {|f| "#{f}.o"} do
   print "Compiling lua_drv.so..."
   sh "gcc #{CFLAGS} #{LDFLAGS} #{EXTLIBDIRS} -o ../priv/lua_drv.so #{FILES.join('.o ')}.o #{EXTLIBS}"
   print " done\n"
-  sh "rm #{FILES.join('.o ')}.o"
+  #sh "rm #{FILES.join('.o ')}.o"
 end
 
 task :clean do
