@@ -1,10 +1,13 @@
-CFLAGS = "-I /opt/local/lib/erlang/erts-5.7.4/include -I /opt/local/var/macports/software/erlang/R13B03_0/opt/local/lib/erlang/lib/erl_interface-3.6.4/include -I /LuaLibrary/src -I /usr/local/lib/erlang/lib/erl_interface-3.6/include -fPIC -g -O2 -Wall"
+CFLAGS = "-I /opt/local/lib/erlang/erts-5.7.4/include -I /opt/local/var/macports/software/erlang/R13B03_0/opt/local/lib/erlang/lib/erl_interface-3.6.4/include -I /usr/local/lib/erlang/lib/erl_interface-3.6/include -I /usr/lib/erlang/lib/erl_interface-3.6.3/include -I /usr/lib/erlang/usr/include -fPIC -g -O2 -Wall"
 if ENV['platform'] == 'linux'
   LDFLAGS = "-shared"
+	EXTLIBDIRS = "-L /usr/lib -L /usr/lib/erlang/lib/erl_interface-3.6.3/lib"
+	EXTLIBS = "-lei -llua"
 else
   LDFLAGS = "-dynamic -bundle -undefined suppress -flat_namespace"
+	EXTLIBDIRS = "-L /opt/local/lib/erlang/lib/erl_interface-3.6.4/lib -L /opt/local/lib"
+	EXTLIBS = "-lei -llua"
 end
-EXTLIBS = "/opt/local/lib/erlang/lib/erl_interface-3.6.4/lib/libei.a /opt/local/lib/liblua.a"
 
 FILES = ["commands", "lua_drv"]
 
@@ -22,7 +25,7 @@ file "../priv/lua_drv.so" => FILES.map {|f| "#{f}.o"} do
   sh "mkdir -p ../priv"
   # puts "gcc #{CFLAGS} #{LDFLAGS} -o ../priv/lua_drv.so #{FILES.join('.o ')}.o #{EXTLIBS}"
   print "Compiling lua_drv.so..."
-  sh "gcc #{CFLAGS} #{LDFLAGS} -o ../priv/lua_drv.so #{FILES.join('.o ')}.o #{EXTLIBS}"
+  sh "gcc #{CFLAGS} #{LDFLAGS} #{EXTLIBDIRS} -o ../priv/lua_drv.so #{FILES.join('.o ')}.o #{EXTLIBS}"
   print " done\n"
   sh "rm #{FILES.join('.o ')}.o"
 end
