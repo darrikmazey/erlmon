@@ -17,7 +17,7 @@ end
 
 task :make_erl do
   print "Compiling Erlang sources..."
-  sh "make"
+  sh "erlc src/*.erl"
   print "... done\n"
 end
 
