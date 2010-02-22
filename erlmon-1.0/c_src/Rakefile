@@ -5,8 +5,9 @@ if ENV['platform'] == 'linux'
 	EXTLIBS = "-lei -llua"
 else
   LDFLAGS = "-dynamic -bundle -undefined suppress -flat_namespace"
-	EXTLIBDIRS = "-L /opt/local/lib/erlang/lib/erl_interface-3.6.4/lib -L /opt/local/lib"
-	EXTLIBS = "-lei -llua"
+	EXTLIBDIRS = ""
+  EXTLIBS = "/opt/local/lib/liblua.a /opt/local/lib/erlang/lib/erl_interface-3.6.4/lib/libei.a"
+
 end
 
 FILES = ["commands", "lua_drv"]
