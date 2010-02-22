@@ -1,9 +1,10 @@
-CFLAGS = "-I /opt/local/lib/erlang/erts-5.7.4/include -I /opt/local/var/macports/software/erlang/R13B03_0/opt/local/lib/erlang/lib/erl_interface-3.6.4/include -I /usr/local/lib/erlang/lib/erl_interface-3.6/include -I /usr/lib/erlang/lib/erl_interface-3.6.3/include -I /LuaLibrary/src -I /usr/lib/erlang/usr/include -fPIC -g -O2 -Wall"
 if ENV['platform'] == 'linux'
+	CFLAGS = "-I /usr/lib/erlang/lib/erl_interface-3.6.3/include -I /usr/lib/erlang/usr/include -fPIC -g -O2 -Wall"
   LDFLAGS = "-shared"
 	EXTLIBDIRS = "-L /usr/lib -L /usr/lib/erlang/lib/erl_interface-3.6.3/lib"
 	EXTLIBS = "-lei -llua"
 else
+	CFLAGS = "-I /opt/local/lib/erlang/erts-5.7.4/include -I /opt/local/var/macports/software/erlang/R13B03_0/opt/local/lib/erlang/lib/erl_interface-3.6.4/include -I /usr/local/lib/erlang/lib/erl_interface-3.6/include -I /LuaLibrary/src -fPIC -g -O2 -Wall"
   LDFLAGS = "-dynamic -bundle -undefined suppress -flat_namespace"
 	EXTLIBDIRS = ""
   EXTLIBS = "/opt/local/lib/liblua.a /opt/local/lib/erlang/lib/erl_interface-3.6.4/lib/libei.a"
