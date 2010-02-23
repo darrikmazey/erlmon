@@ -13,7 +13,7 @@
 init(_) ->
 	{ok, []}.
 
-handle_event(#state_change{new_state=down}=Event, State) ->
+handle_event(#state_change{objtype=node, new_state=down}=Event, State) ->
 	debug:log("node_down_handler: ~p", [Event]),
 	{ok, State};
 handle_event(Event, State) ->
