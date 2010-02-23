@@ -59,7 +59,7 @@ announce([{Node, up}|T], State) ->
 			announce(T, State);
 		true ->
 			debug:log("not announcing to self"),
-			state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=node(), prev_state=down, new_state=up, ts=timestamp:now_i()}
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=node(), prev_state=down, new_state=up, ts=timestamp:now_i()})
 	end;
 announce([], _State) ->
 	[].
@@ -69,12 +69,12 @@ find_node_pid(Node) when is_atom(Node) ->
 
 monitor_node(Node) ->
 	debug:log("node: monitoring ~p (~p)", [Node, self()]),
-	state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=down, new_state=up, ts=timestamp:now_i()},
+	state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=down, new_state=up, ts=timestamp:now_i()}),
 	erlang:monitor_node(Node, true),
 	receive
 		{nodedown, Node} ->
 			debug:log("node: received nodedown for ~p (~p)", [Node, self()]),
-			state_mon ! #state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=up, new_state=down, ts=timestamp:now_i()};
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=up, new_state=down, ts=timestamp:now_i()});
 		M ->
 			debug:log("node:UNKNOWN: ~p (~p)", [M, self()])
 	end.
