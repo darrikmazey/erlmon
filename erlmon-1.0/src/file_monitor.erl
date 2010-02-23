@@ -15,7 +15,7 @@ init(FileName) ->
 	case file:read_file_info(FileName) of
 		{ok, FileInfo} ->
 			debug:log("fileinfo: ~p", [FileInfo]),
-			state_mon ! #state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unmonitored, new_state=unchanged, ts=timestamp:now_i()},
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unmonitored, new_state=unchanged, ts=timestamp:now_i()}),
 			loop(FileName, FileInfo);
 		{error, Reason} ->
 			debug:log("error: ~p", [Reason])
@@ -27,10 +27,10 @@ loop(FileName, State) ->
 		{ok, State} ->
 			NewState = State;
 		{ok, FileInfo} ->
-			state_mon ! #state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unchanged, new_state=changed, ts=timestamp:now_i()},
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unchanged, new_state=changed, ts=timestamp:now_i()}),
 			NewState = FileInfo;
 		{error, Reason} ->
-			state_mon ! #state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unchanged, new_state=nonexistent, ts=timestamp:now_i()},
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unchanged, new_state=nonexistent, ts=timestamp:now_i()}),
 			NewState = {error, Reason}
 	end,
 	loop(FileName, NewState).

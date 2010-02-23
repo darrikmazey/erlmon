@@ -41,7 +41,7 @@ loop(OldState, Filesystem) ->
 				false ->
 					case OldState of
 						alert ->
-							state_mon ! #state_change{sender=self(), node=node(), objtype=disk, obj=Path, prev_state=alert, new_state=ok, ts=timestamp:now_i()},
+							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=Path, prev_state=alert, new_state=ok, data=NewPercent, ts=timestamp:now_i()}),
 							loop(ok, NewFilesystem);
 						_ ->
 							loop(ok, NewFilesystem)
@@ -49,7 +49,7 @@ loop(OldState, Filesystem) ->
 				true ->
 					case OldState of
 						ok ->
-							state_mon ! #state_change{sender=self(), node=node(), objtype=disk, obj=Path, prev_state=ok, new_state=alert, ts=timestamp:now_i()},
+							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=Path, prev_state=ok, new_state=alert, data=NewPercent, ts=timestamp:now_i()}),
 							loop(alert, NewFilesystem);
 						_ ->
 							loop(alert, NewFilesystem)
