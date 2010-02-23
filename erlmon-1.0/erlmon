@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ -z $1 ]; then
-erl -pa ebin/ -config sys -name erlmon -eval "application:start(erlmon), application:start(erlwww)."
+erl -pa ebin/ -config sys -name erlmon -eval "application:start(erlmon)."
 else
-erl -pa ebin/ -s erlmon -config sys -name $1 -eval "application:start(erlmon), application:start(erlwww)."
+erl -pa ebin/ -s erlmon -config sys -name $1 -eval "application:start(erlmon)."
 fi

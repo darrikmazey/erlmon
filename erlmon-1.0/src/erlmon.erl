@@ -17,6 +17,8 @@ start(_Type, _StartArgs) ->
 	erlmon_sup:start_link().
 
 init(_) ->
+	application:set_env(erlwww, port, 8000),
+	application:start(erlwww),
 	state_change_sup:start_link(),
 	state_change_em:add_handler(state_change_handler),
 	state_change_em:add_handler(node_down_handler).
