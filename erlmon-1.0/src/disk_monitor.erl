@@ -25,7 +25,7 @@ init(Path) ->
 		not_found ->
 			null;
 		#filesystem{} ->
-			loop(ok, Filesystem)
+			loop(first, Filesystem)
 	end.
 
 loop(OldState, Filesystem) ->
@@ -34,14 +34,18 @@ loop(OldState, Filesystem) ->
 			stopped
 	after
 		3000 ->
-			#filesystem{path=Path, percent=Percent} = Filesystem,
+			#filesystem{path=Path, percent=_Percent} = Filesystem,
 			NewFilesystem = df:find_path(Path),
-			#filesystem{path=Path, percent=NewPercent} = NewFilesystem,
+			#filesystem{path=Path, percent=NewPercent, mount=Mount} = NewFilesystem,
+			ObjName = lists:flatten([Path, ":"| Mount]),
 			case NewPercent > 90 of
 				false ->
 					case OldState of
 						alert ->
-							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=Path, prev_state=alert, new_state=ok, data=NewPercent, ts=timestamp:now_i()}),
+							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=ObjName, prev_state=alert, new_state=ok, data=NewPercent, ts=timestamp:now_i()}),
+							loop(ok, NewFilesystem);
+						first ->
+							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=ObjName, prev_state=none, new_state=ok, data=NewPercent, ts=timestamp:now_i()}),
 							loop(ok, NewFilesystem);
 						_ ->
 							loop(ok, NewFilesystem)
@@ -49,7 +53,10 @@ loop(OldState, Filesystem) ->
 				true ->
 					case OldState of
 						ok ->
-							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=Path, prev_state=ok, new_state=alert, data=NewPercent, ts=timestamp:now_i()}),
+							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=ObjName, prev_state=ok, new_state=alert, data=NewPercent, ts=timestamp:now_i()}),
+							loop(alert, NewFilesystem);
+						first ->
+							state_change_em:notify(#state_change{sender=self(), node=node(), objtype=disk, obj=ObjName, prev_state=none, new_state=alert, data=NewPercent, ts=timestamp:now_i()}),
 							loop(alert, NewFilesystem);
 						_ ->
 							loop(alert, NewFilesystem)
