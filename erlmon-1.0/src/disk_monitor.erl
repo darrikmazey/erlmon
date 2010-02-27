@@ -5,8 +5,12 @@
 -export([start/1]).
 -export([start_all/0]).
 -export([init/1]).
+-export([monitor/1]).
 
 -include("include/erlmon.hrl").
+
+monitor(Path) ->
+	disk_monitor_sup:monitor(Path).
 
 start_all() ->
 	start_each(df:list()).
@@ -17,9 +21,10 @@ start_each([#filesystem{path=Path}|T]) ->
 start_each([]) -> ok.
 
 start(Path) ->
-	spawn_link(?MODULE, init, [Path]).
+	{ok, spawn_link(?MODULE, init, [Path])}.
 
 init(Path) ->
+	debug:log("disk_monitor:init(~p)", [Path]),
 	Filesystem = df:find_path(Path),
 	case Filesystem of
 		not_found ->

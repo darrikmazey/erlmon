@@ -4,12 +4,16 @@
 
 -export([start/1]).
 -export([init/1]).
+-export([monitor/1]).
 
 -include_lib("kernel/include/file.hrl").
 -include("include/erlmon.hrl").
 
+monitor(Path) ->
+	file_monitor_sup:monitor(Path).
+
 start(FileName) ->
-	spawn_link(?MODULE, init, [FileName]).
+	{ok, spawn_link(?MODULE, init, [FileName])}.
 
 init(FileName) ->
 	case file:read_file_info(FileName) of
