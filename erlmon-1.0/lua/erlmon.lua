@@ -42,4 +42,5 @@ end
 
 Erlmon = _erlmon()
 
-
+-- load monitors, which may need the global Erlmon table
+require "lua/monitors/monitors"
