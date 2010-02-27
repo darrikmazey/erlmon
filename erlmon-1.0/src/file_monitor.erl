@@ -26,16 +26,23 @@ init(FileName) ->
 	end.
 
 loop(FileName, State) ->
-	timer:sleep(3000),
+	receive
+		M ->
+			debug:log("file_monitor: ~p: UNKNOWN: ~p", [self(), M])
+		after
+			3000 ->
 	case file:read_file_info(FileName) of
 		{ok, State} ->
-			NewState = State;
+			NewState = State,
+			loop(FileName, NewState);
 		{ok, FileInfo} ->
 			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unchanged, new_state=changed, ts=timestamp:now_i()}),
-			NewState = FileInfo;
+			NewState = FileInfo,
+			loop(FileName, NewState);
 		{error, Reason} ->
 			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=file, obj=FileName, prev_state=unchanged, new_state=nonexistent, ts=timestamp:now_i()}),
-			NewState = {error, Reason}
-	end,
-	loop(FileName, NewState).
+			NewState = {error, Reason},
+			loop(FileName, NewState)
+	end
+	end.
 

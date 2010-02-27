@@ -4,6 +4,7 @@
          close/1,
          call/3,
          concat/2,
+	 dump_table/2,
          getfield/3,
          getglobal/2,
          gettop/1,
@@ -36,6 +37,41 @@ call(L, Args, Results) ->
     
 concat(L, N) ->
     command(L, {?ERL_LUA_CONCAT, N}).
+
+dump_table(L, N) ->
+	dump_table(L, N, none).
+
+dump_table(L, N, NextKey) ->
+	io:format("dump_table(~p, ~p)~n", [N, NextKey]),
+	case NextKey of
+		none ->
+			Str=lists:concat(["tmpkey, tmpval = pairs(", N, ")(", N, ")"]);
+		NK ->
+			Str=lists:concat(["tmpkey, tmpval = pairs(", N, ")(", N, ", \"", NK, "\")"])
+	end,
+	io:format("Str == ~p~n", [Str]),
+	lual:dostring(L, Str),
+	lua:getglobal(L, "tmpkey"),
+	{ok, T} = lua:type(L, -1),
+	case T of
+		?LUA_TNIL -> [];
+		_ ->
+			{ok, K} = lua:tolstring(L, -1),
+			lua:remove(L, -1),
+			lua:getglobal(L, "tmpval"),
+			{ok, VT} = lua:type(L, -1),
+			io:format("type == ~p~n", [VT]),
+			case VT of
+				?LUA_TNUMBER ->
+					{ok, V} = lua:tonumber(L, -1);
+				?LUA_TTABLE ->
+					V = dump_table(L, lists:concat([N, ".", K]));
+				_ ->
+					{ok, V} = lua:tolstring(L, -1)
+			end,
+			lua:remove(L, -1),
+			[{list_to_atom(K),V}|dump_table(L, N, K)]
+	end.
 
 getfield(L, global, Name) ->
     getglobal(L, Name);
