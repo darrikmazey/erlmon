@@ -3,4 +3,10 @@
 -- test the file on the command line, by typing lua config.lua
 require "lua/erlmon"
 
-monitor_file("/Users/chadd/foo")
+
+monitor_process("memcached", 
+  { start = "memcached", 
+    stop = "killall memcached"
+  })
+
+

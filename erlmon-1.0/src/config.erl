@@ -6,7 +6,8 @@
 -include_lib("eunit/include/eunit.hrl").
 -define(SERVER, {global, ?MODULE}).
 
--export([start_link/0]).
+-export([start_link/0,
+         reload/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -18,14 +19,20 @@
 %% system simply starts a special case file_monitor that watches the
 %% erlmon config file. When a change is detected the file is reloaded.
 
-%% TODO: Darrik this needs to pass a callback function, 
-%% i want to call config:handle_info/2 if the file changes
-%% file_monitor:start("erlmon.conf"),
+reload() -> 
+  gen_server:call(?MODULE, {reload,event}).
+
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-    {ok, #config_state{}}.
+  debug:log("CONFIG: init ~n"),
+  {ok, #config_state{lua_state=lua:new_state()}}.
+
+%% reload config
+handle_call({reload,ReloadType}, _From, State) ->
+  debug:log("CONFIG: reload ~n"),
+  {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
     Reply = ok,

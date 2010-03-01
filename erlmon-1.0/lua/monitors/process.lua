@@ -26,8 +26,3 @@ function monitor_process(name,startcmd,stopcmd,restartcmd)
 
 end
 
-monitor_process("memcached", 
-  { start = "memcached", 
-    stop = "killall memcached"
-  })
-

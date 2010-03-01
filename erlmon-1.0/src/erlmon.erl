@@ -21,7 +21,13 @@ init(_) ->
 	application:start(erlwww),
 	state_change_sup:start_link(),
 	state_change_em:add_handler(state_change_handler),
-	state_change_em:add_handler(node_down_handler).
+	state_change_em:add_handler(node_down_handler),
+  load().
+
+load() -> 
+  file_monitor:monitor("config.lua"),
+  ok.
+
 
 stop(_State) ->
 	debug:log("erlmon: stopping"),

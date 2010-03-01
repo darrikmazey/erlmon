@@ -13,8 +13,9 @@
 init(_) ->
 	{ok, []}.
 
-handle_event(#state_change{objtype=file, obj="erlmon.cfg", new_state=changed}=Event, State) ->
+handle_event(#state_change{objtype=file, obj="config.lua", new_state=changed}=Event, State) ->
 	debug:log("CONFIG FILE CHANGED: ~p", [Event]),
+  config:reload(),
 	{ok, State};
 handle_event(Event, State) ->
 	{ok, State}.
