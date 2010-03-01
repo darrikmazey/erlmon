@@ -14,10 +14,10 @@ close(#lua{port=Port}) ->
 
 %% Private functions
 load_driver() ->
-  SearchDir = filename:join([filename:dirname(code:which(lua_driver)), "..", "priv"]),
-  case erl_ddll:load(SearchDir, "lua_drv") of
+  SearchDir = filename:join([filename:dirname(code:which(lua_driver)), "..", "lib"]),
+  case erl_ddll:load(SearchDir, liberlua) of
     ok ->
-      {ok, open_port({spawn, 'lua_drv'}, [binary])};
+      {ok, open_port({spawn, 'liberlua'}, [binary])};
     Error ->
       Error
   end.

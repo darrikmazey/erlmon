@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "lua_drv.h"
+#include "erlua.h"
 #include "commands.h"
 
 static ErlDrvData start (ErlDrvPort port, char* cmd);
@@ -19,7 +19,7 @@ static ErlDrvEntry lua_driver_entry = {
     NULL,                             /* output */
     NULL,                             /* ready_input */
     NULL,                             /* ready_output */
-    "lua_drv",                        /* the name of the driver */
+    "liberlua",                        /* the name of the driver */
     NULL,                             /* finish */
     NULL,                             /* handle */
     NULL,                             /* control */
@@ -136,6 +136,10 @@ process(ErlDrvData handle, ErlIOVec *ev)
   case ERL_LUAL_DOSTRING:
     erl_lual_dostring(driver_data, buf, index);
     break;
+	
+	case ERL_LUAL_DOFILE:
+		erl_lual_dofile(driver_data, buf, index);
+		break;
   
   default:
     erl_lua_no_command(driver_data);

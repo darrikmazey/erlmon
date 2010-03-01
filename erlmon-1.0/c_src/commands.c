@@ -4,7 +4,7 @@
 #include <lauxlib.h>
 #include <string.h>
 
-#include "lua_drv.h"
+#include "erlua.h"
 #include "commands.h"
 
 static void reply_ok(lua_drv_t *driver_data);
@@ -318,6 +318,18 @@ erl_lual_dostring(lua_drv_t *driver_data, char *buf, int index)
     reply_error(driver_data);
 }
 
+void
+erl_lual_dofile(lua_drv_t *driver_data, char *buf, int index)
+{
+	char *code;
+
+	code = decode_string(buf, &index);
+	
+	if (!luaL_dofile(driver_data->L, code))
+		reply_ok(driver_data);
+	else
+		reply_error(driver_data);
+}
 
 void
 erl_lua_no_command(lua_drv_t *driver_data)
