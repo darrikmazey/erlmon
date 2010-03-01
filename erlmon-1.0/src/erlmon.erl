@@ -14,15 +14,16 @@ start(_Type, _StartArgs) ->
 	debug:log_to(console, {}),
 	debug:log("erlmon: initializing"),
 	init([]),
-	erlmon_sup:start_link().
+	R = erlmon_sup:start_link(),
+  load(),
+	R.
 
 init(_) ->
 	application:set_env(erlwww, port, 8000),
 	application:start(erlwww),
 	state_change_sup:start_link(),
 	state_change_em:add_handler(state_change_handler),
-	state_change_em:add_handler(node_down_handler),
-  load().
+	state_change_em:add_handler(node_down_handler).
 
 load() -> 
   file_monitor:monitor("config.lua"),
