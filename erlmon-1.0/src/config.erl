@@ -32,6 +32,7 @@ init([]) ->
 %% reload config
 handle_call({reload,ReloadType}, _From, State) ->
   debug:log("CONFIG: reload ~n"),
+  Reply = ok,
   {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
