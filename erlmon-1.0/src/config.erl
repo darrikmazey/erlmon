@@ -20,19 +20,25 @@
 %% erlmon config file. When a change is detected the file is reloaded.
 
 reload() -> 
-  gen_server:call(?MODULE, {reload,event}).
+  debug:log("CONFIG:reload"),
+  gen_server:call(config, {reload,event}).
 
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-  debug:log("CONFIG: init ~n"),
-  {ok, #config_state{lua_state=lua:new_state()}}.
+  debug:log("CONFIG: init~n"),
+  {ok,State} = lua:new_state(),
+  debug:log("CONFIG: lua state initialized. ~n"),
+  {ok, #config_state{lua_state=State}}.
 
 %% reload config
-handle_call({reload,ReloadType}, _From, State) ->
-  debug:log("CONFIG: reload ~n"),
-  Reply = ok,
+handle_call({reload,_ReloadType}, _From, State) ->
+  debug:log("CONFIG: loading lua file"),
+  Reply = lua:dofile(State#config_state.lua_state,"config.lua"),
+  debug:log("CONFIG: parsing erlmon table"),
+  %% Config = lua:dump_table(L,'erlmon'),
+  debug:log("CONFIG: reloaded"),
   {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->

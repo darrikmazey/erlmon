@@ -23,10 +23,12 @@ init(_) ->
 	application:start(erlwww),
 	state_change_sup:start_link(),
 	state_change_em:add_handler(state_change_handler),
+	state_change_em:add_handler(config_file_change_handler),
 	state_change_em:add_handler(node_down_handler).
 
 load() -> 
   file_monitor:monitor("config.lua"),
+  config:start_link(),
   ok.
 
 
