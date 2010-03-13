@@ -9,9 +9,10 @@ title() ->
 	"erlmon configuration".
 
 body() ->
+  Config = "",
   [
     #h1{text="Configuration"},
-    #p,
+    #p{},
     #label{text="Edit the configuration file for this node."},
     #textarea { text=Config }
 
