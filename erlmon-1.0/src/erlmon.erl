@@ -29,6 +29,7 @@ init(_) ->
 load() -> 
   file_monitor:monitor("config.lua"),
   config:start_link(),
+  config:reload(),
   ok.
 
 

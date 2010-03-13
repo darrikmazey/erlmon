@@ -47,8 +47,12 @@ handle_call({reload,_ReloadType}, _From, State) ->
   {reply, Reply, State};
 
 handle_call({authenticate, Login, Password}, _From, State) ->
-  Reply = lua_erl:call(State#config_state.lua_state,
-              authenticate, [Login,Password], 1),
+  L = State#config_state.lua_state,
+  lua:getfield(L, global, "authenticate"),
+  lua:pushstring(L, Login),
+  lua:pushstring(L, Password),
+  lua:call(L, 2, 1),
+  {ok,boolean,Reply} = lua:pop(L),
   debug:log("CONFIG: Authenticate: Lua returned: ~p",[Reply]),
   {reply, Reply, State};
 
