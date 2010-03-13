@@ -22,6 +22,8 @@ init([Host, Port]) ->
 loop([Host, Port], State) ->
 	ObjName = lists:concat(io_lib:format("~s~s~p", [Host, ":",Port])),
 	receive
+		stop ->
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=tcp_port, obj=ObjName, prev_state=State, new_state=unmonitored, ts=timestamp:now_i()});
 		M ->
 			debug:log("tcp_port_monitor: ~p: UNKNOWN: ~p", [self(), M])
 		after
@@ -31,20 +33,23 @@ loop([Host, Port], State) ->
 						gen_tcp:close(Sock),
 						case State of
 							up ->
-								NewState = up;
+								NewState = up,
+								loop([Host, Port], NewState);
 							OldState ->
 								state_change_em:notify(#state_change{sender=self(), node=node(), objtype=tcp_port, obj=ObjName, prev_state=OldState, new_state=up, ts=timestamp:now_i()}),
-								NewState = up
+								NewState = up,
+								loop([Host, Port], NewState)
 						end;
 					{error, _Reason} ->
 					  case State of
 							down ->
-								NewState = down;
+								NewState = down,
+								loop([Host, Port], NewState);
 							OldState ->
 								state_change_em:notify(#state_change{sender=self(), node=node(), objtype=tcp_port, obj=ObjName, prev_state=OldState, new_state=down, ts=timestamp:now_i()}),
-								NewState = down
+								NewState = down,
+								loop([Host, Port], NewState)
 						end
-				end,
-				loop([Host, Port], NewState)
+				end
 	end.
 

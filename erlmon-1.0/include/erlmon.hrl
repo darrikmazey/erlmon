@@ -19,3 +19,10 @@
 
 %% filesystem
 -record(filesystem, {path, size, used, avail, percent, mount}).
+
+
+%% --- monitor records --- %%
+
+%% tcp port monitor
+-record(tcp_port_monitor, {host, port, pid}).
+
