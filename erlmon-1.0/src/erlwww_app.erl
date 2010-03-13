@@ -23,6 +23,7 @@ stop(_) -> nitrogen:stop().
 %%
 %% route("/web/newroute/" ++ PathInfo) -> {web_index, PathInfo};
 
+route("/web/login") -> login;
 route(Path) -> nitrogen:route(Path).
 
 
@@ -34,4 +35,16 @@ route(Path) -> nitrogen:route(Path).
 %% of a page. Alternatively, you can use the wf:redirect* functions to 
 %% issue a client-side redirect to a new page.
 
-request(Module) -> nitrogen:request(Module).
+request(Module) ->
+  case Module of
+    login ->
+      debug:log("login request:~p",[wf:get_path_info()]),
+      ok;
+    _ -> 
+      debug:log("other request"),
+      User = wf:user(),
+      case User of
+        undefined -> wf:redirect_to_login("/web/login");
+        _ -> ok
+      end
+  end.

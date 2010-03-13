@@ -6,11 +6,11 @@ main() ->
 	#template { file="./wwwroot/template.html"}.
 
 title() ->
-	"web_index".
+	"erlmon home.".
 
 body() ->
 	#label{text="web_index body."}.
 
-menu_items() -> helper:menu([{home,"Home","/"},{nodes,"Nodes","/nodes"}]).
+menu_items() -> helper:menu([{home,"dashboard","/"},{nodes,"configuration","/config"}]).
 	
 event(_) -> ok.

@@ -7,7 +7,8 @@
 -define(SERVER, {global, ?MODULE}).
 
 -export([start_link/0,
-         reload/0]).
+         reload/0,
+         authenticate/2]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -22,6 +23,10 @@
 reload() -> 
   debug:log("CONFIG:reload"),
   gen_server:call(config, {reload,event}).
+
+authenticate(Login,Password) -> 
+  debug:log("CONFIG:authenticating"),
+  gen_server:call(config, {authenticate, Login, Password}).
 
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -39,6 +44,12 @@ handle_call({reload,_ReloadType}, _From, State) ->
   debug:log("CONFIG: parsing erlmon table"),
   %% Config = lua:dump_table(L,'erlmon'),
   debug:log("CONFIG: reloaded"),
+  {reply, Reply, State};
+
+handle_call({authenticate, Login, Password}, _From, State) ->
+  Reply = lua_erl:call(State#config_state.lua_state,
+              authenticate, [Login,Password], 1),
+  debug:log("CONFIG: Authenticate: Lua returned: ~p",[Reply]),
   {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->

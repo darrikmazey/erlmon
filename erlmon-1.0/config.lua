@@ -3,10 +3,11 @@
 -- test the file on the command line, by typing lua config.lua
 require "lua/erlmon"
 
+http.login = 'foo'
+http.password = 'bar'
 
 monitor_process("memcached", 
   { start = "memcached", 
     stop = "killall memcached"
   })
-
 

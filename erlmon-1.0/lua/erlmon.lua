@@ -44,3 +44,6 @@ Erlmon = _erlmon()
 
 -- load monitors, which may need the global Erlmon table
 require "lua/monitors/monitors"
+
+-- authentication
+require "lua/authentication"
