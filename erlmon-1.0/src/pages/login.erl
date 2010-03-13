@@ -22,9 +22,9 @@ event(_) ->
   Login = wf:q(login),
   Password = wf:q(password),
   case config:authenticate(Login,Password) of
-    ok -> wf:user(admin),
+    true -> wf:user(admin),
           wf:redirect_from_login("/");
-    error -> wf:flash(helper:flash_error("Invalid Login"))
+    false -> wf:flash(helper:flash_error("Invalid Login"))
   end.
 
 

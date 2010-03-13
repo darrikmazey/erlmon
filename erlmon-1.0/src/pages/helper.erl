@@ -7,4 +7,4 @@ menu(MenuItems) ->
     ["<li>",wf:f("<a href=~p>~s</a>",[Url,Text]),"</li"] end,MenuItems),
   ["<ul>",Items,"</ul>"].
 
-
+flash_error(Error) -> wf:flash( #label { text= Error } ).
