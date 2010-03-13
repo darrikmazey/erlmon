@@ -1,4 +1,4 @@
 
 function authenticate(login,password)
-  return http.login == login and http.password == password
+  return Erlmon.http.login == login and Erlmon.http.password == password
 end
