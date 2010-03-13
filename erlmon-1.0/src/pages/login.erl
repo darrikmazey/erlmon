@@ -19,8 +19,8 @@ body() ->
   ].
 
 event(_) -> 
-  Login = wf:q(login),
-  Password = wf:q(password),
+  [Login] = wf:q(login),
+  [Password] = wf:q(password),
   case config:authenticate(Login,Password) of
     true -> wf:user(admin),
           wf:redirect_from_login("/");
