@@ -10,6 +10,7 @@
 -export([unmonitor/2]).
 
 monitor(Host, Port) ->
+	debug:log("tcp_port_monitor_sup:monitor(~p, ~p)", [Host, Port]),
 	supervisor:start_child(tcp_port_monitor_sup, [Host, Port]).
 
 unmonitor(Host, Port) ->
