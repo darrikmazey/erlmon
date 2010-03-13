@@ -10,5 +10,10 @@ title() ->
 
 body() ->
 	#label{text="web_index body."}.
+
+menu_items() -> 
+          "<ul>
+            <li class='active'><a href='/'>Home</a></li>
+          </ul>".
 	
 event(_) -> ok.
