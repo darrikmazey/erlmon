@@ -34,6 +34,7 @@ extern "C" {
   void erl_lua_type(lua_drv_t *driver_data, char *buf, int index);
   
   void erl_lual_dostring (lua_drv_t *driver_data, char *buf, int index);
+	void erl_lual_dofile (lua_drv_t *driver_data, char *buf, int index);
   
   void erl_lua_no_command (lua_drv_t *driver_data);
 
