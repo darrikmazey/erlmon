@@ -10,7 +10,7 @@
 -include("include/erlmon.hrl").
 
 monitor(Path) ->
-	file_monitor_sup:monitor(Path).
+	file_monitor_man:monitor(Path).
 
 start(FileName) ->
 	{ok, spawn_link(?MODULE, init, [FileName])}.

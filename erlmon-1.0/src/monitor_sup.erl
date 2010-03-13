@@ -15,4 +15,6 @@ init(_) ->
 	DMSChild = {disk_monitor_sup, {disk_monitor_sup, start_link, []}, permanent, 2000, supervisor, [disk_monitor_sup]},
 	FMSChild = {file_monitor_sup, {file_monitor_sup, start_link, []}, permanent, 2000, supervisor, [file_monitor_sup]},
 	FMMChild = {file_monitor_man, {file_monitor_man, start_link, []}, permanent, 2000, worker, [file_monitor_man]},
-	{ok, {{one_for_one, 1, 1}, [DMSChild, FMSChild, FMMChild]}}.
+	TPMSChild = {tcp_port_monitor_sup, {tcp_port_monitor_sup, start_link, []}, permanent, 2000, supervisor, [tcp_port_monitor_sup]},
+	TPMMChild = {tcp_port_monitor_man, {tcp_port_monitor_man, start_link, []}, permanent, 2000, worker, [tcp_port_monitor_man]},
+	{ok, {{one_for_one, 1, 1}, [DMSChild, FMSChild, FMMChild, TPMSChild, TPMMChild]}}.

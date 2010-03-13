@@ -4,7 +4,7 @@
 
 
 %% state change
--record(state_change, {sender, node, objtype, obj, prev_state, new_state, callback=none, data=none, ts}).
+-record(state_change, {sender, node, objtype, obj, prev_state, new_state, data=none, ts}).
 
 %% announce
 -record(storage_announce, {sender, node}).
