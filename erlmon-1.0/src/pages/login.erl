@@ -24,7 +24,7 @@ event(_) ->
   case config:authenticate(Login,Password) of
     true -> wf:user(admin),
           wf:redirect_from_login("/");
-    false -> wf:flash(helper:flash_error("Invalid Login"))
+    false -> helper:flash_error("Invalid Login")
   end.
 
 
