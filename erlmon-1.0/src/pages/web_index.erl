@@ -11,9 +11,6 @@ title() ->
 body() ->
 	#label{text="web_index body."}.
 
-menu_items() -> 
-          "<ul>
-            <li class='active'><a href='/'>Home</a></li>
-          </ul>".
+menu_items() -> helper:menu([{home,"Home","/"},{nodes,"Nodes","/nodes"}]).
 	
 event(_) -> ok.
