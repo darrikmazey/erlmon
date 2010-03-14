@@ -23,19 +23,12 @@ loop(State) ->
 			NewState = [State|start_conditionally(Host, Port, State)],
 			loop(NewState);
 		{stop, Host, Port} ->
-			NewState = remove_from_state(stop_conditionally(Host, Port, State), State),
+			NewState = stop_conditionally(Host, Port, State),
 			loop(NewState);
 		M ->
 			debug:log("tcp_port_monitor_man: UNKNOWN: ~p", [M]),
 			loop(State)
 	end.
-
-remove_from_state(M, [M|T]) ->
-	T;
-remove_from_state(_M, []) ->
-	[];
-remove_from_state(M, [H|T]) ->
-	[H|remove_from_state(M, T)].
 
 monitor(Host, Port) ->
 	?MODULE ! {start, Host, Port},

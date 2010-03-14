@@ -5,11 +5,15 @@
 -export([start/2]).
 -export([init/1]).
 -export([monitor/2]).
+-export([unmonitor/2]).
 
 -include("include/erlmon.hrl").
 
 monitor(Host, Port) ->
 	tcp_port_monitor_man:monitor(Host, Port).
+
+unmonitor(Host, Port) ->
+	tcp_port_monitor_man:unmonitor(Host, Port).
 
 start(Host, Port) ->
 	debug:log("tcp_port_monitor:start([~p, ~p])", [Host, Port]),
