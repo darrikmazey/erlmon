@@ -74,8 +74,8 @@ process(ErlDrvData handle, ErlIOVec *ev)
   ei_decode_tuple_header(buf, &index, &arty);
   ei_decode_long(buf, &index, &command);
   
-  // printf("Command: %ld\n", command);
-  // printf("sizeof: int: %ld, long: %ld, long long: %ld\n", sizeof(int), sizeof(long), sizeof(long long));
+//  printf("Command: %ld\n", command);
+//  printf("sizeof: int: %ld, long: %ld, long long: %ld\n", sizeof(int), sizeof(long), sizeof(long long));
   
   switch(command) {
   case ERL_LUA_CALL:
@@ -93,6 +93,10 @@ process(ErlDrvData handle, ErlIOVec *ev)
   case ERL_LUA_GETTOP:
     erl_lua_gettop(driver_data, buf, index);
     break;
+	case ERL_LUA_NEXT:
+		erl_lua_next(driver_data, buf, index);
+		break;
+
   case ERL_LUA_PUSHBOOLEAN:
     erl_lua_pushboolean(driver_data, buf, index);
     break;

@@ -81,6 +81,18 @@ erl_lua_gettop(lua_drv_t *driver_data, char *buf, int index)
 }
 
 void
+erl_lua_next(lua_drv_t *driver_data, char *buf, int index)
+{
+  long n;
+  
+  ei_decode_long(buf, &index, &n);
+  
+	lua_next(driver_data->L, n);
+
+	reply_ok(driver_data);
+}
+
+void
 erl_lua_pushboolean(lua_drv_t *driver_data, char *buf, int index)
 {
   int b;
