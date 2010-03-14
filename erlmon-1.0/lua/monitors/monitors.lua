@@ -3,7 +3,7 @@
 --require "lua/monitors/file"
 --require "lua/monitors/process"
 --require "lua/monitors/loopback"
-require "monitors/port"
+require "lua/monitors/port"
 
 function _add_monitors(host_monitors)
 

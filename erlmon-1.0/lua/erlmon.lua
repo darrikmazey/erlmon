@@ -2,7 +2,7 @@
 -- helper functions for monitors
 
 -- load monitors
-require "monitors/monitors"
+require "lua/monitors/monitors"
 
 function _add_host(name)
   local host = {}
@@ -51,4 +51,4 @@ _add_convenience_monitor_functions()
 
 -- redefine the method in your config file if you want 
 -- to have your own authentication 
-require "authentication"
+require "lua/authentication"
