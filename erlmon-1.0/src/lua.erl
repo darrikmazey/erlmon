@@ -124,7 +124,7 @@ gettablekey(L, T) ->
 					KV = {Key, gettable(L, T + 2)},
 					remove(L, -1),
 					[KV|gettablekey(L, T)];
-				_ ->
+				_TA ->
 					{ok, _Type, Val} = pop(L),
 					{ok, Key} = tolstring(L, -1),
 					[{Key, Val}|gettablekey(L, T)]
@@ -159,10 +159,12 @@ pop(L) ->
 						{other, N} = toboolean(L, R),
 						remove(L, R),
 						{ok, boolean, N};
-					_ ->
-						{ok, N} = tolstring(L, R),
+					function ->
 						remove(L, R),
-						{ok, unknown, N}
+					  {ok, function, function};
+					_ ->
+						remove(L, R),
+						{ok, unknown, unknown}
 				end
 		end.
 
