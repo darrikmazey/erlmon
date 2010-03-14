@@ -40,9 +40,17 @@ init([]) ->
 %% reload config
 handle_call({reload,_ReloadType}, _From, State) ->
   debug:log("CONFIG: loading lua file"),
-  Reply = lua:dofile(State#config_state.lua_state,"config.lua"),
+  L = State#config_state.lua_state,
+  Reply = lua:dofile(L,"config.lua"),
   debug:log("CONFIG: parsing erlmon table"),
-  %% Config = lua:dump_table(L,'erlmon'),
+  %%Config = lua:gettable(L,global,'Erlmon'),
+  lua:dostring(L,"monitor_list = Erlmon.monitors.list"),
+  %%lua:gettable(L,global,"monitor_list"),
+  List = [
+    ["port",[{"localhost",22}]],
+    ["process",[{"memcached"}]]
+  ],
+  apply_config_list(List),
   debug:log("CONFIG: reloaded"),
   {reply, Reply, State};
 
@@ -58,20 +66,28 @@ handle_call({authenticate, Login, Password}, _From, State) ->
   {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
-    Reply = ok,
-    {reply, Reply, State}.
+  Reply = ok,
+  {reply, Reply, State}.
 
 handle_cast(_Msg, State) ->
-    {noreply, State}.
+  {noreply, State}.
 
 handle_info(_Info, State) ->
-    {noreply, State}.
+  {noreply, State}.
 
 terminate(_Reason, _State) ->
-    ok.
+  ok.
 
 code_change(_OldVsn, State, _Extra) ->
-    {ok, State}.
+  {ok, State}.
+
+apply_config_list(List) -> 
+  lists:map(fun(Monitor) -> apply_monitors(Monitor) end,List),
+  ok.
+
+apply_monitors(Monitor) ->
+  debug:log("Monitor ~p starting.",[Monitor]),
+  ok.
 
 %% testcases
 config_test() -> ok.
