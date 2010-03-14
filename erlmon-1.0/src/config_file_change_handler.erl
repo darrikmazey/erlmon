@@ -13,7 +13,7 @@
 init(_) ->
 	{ok, []}.
 
-handle_event(#state_change{objtype=file, obj="config.lua", new_state=changed}=Event, State) ->
+handle_event(#state_change{objtype=file, obj="config.lua", new_state=file_ctime_changed}=Event, State) ->
 	debug:log("CONFIG FILE CHANGED: ~p", [Event]),
   config:reload(),
 	{ok, State};
