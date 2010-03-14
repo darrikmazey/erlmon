@@ -47,8 +47,8 @@ handle_call({reload,_ReloadType}, _From, State) ->
   lua:dostring(L,"monitor_list = Erlmon.monitors.list"),
   %%lua:gettable(L,global,"monitor_list"),
   List = [
-    ["port",[{"localhost",22}]],
-    ["process",[{"memcached"}]]
+    ["tcp_port",["localhost",22]],
+    ["process",["/usr/sbin/sshd"]]
   ],
   apply_config_list(List),
   debug:log("CONFIG: reloaded"),
@@ -87,6 +87,9 @@ apply_config_list(List) ->
 
 apply_monitors(Monitor) ->
   debug:log("Monitor ~p starting.",[Monitor]),
+	[MonType, Args] = Monitor,
+	Mod = list_to_atom(MonType ++ "_monitor"),
+	erlang:apply(Mod, monitor, Args),
   ok.
 
 %% testcases

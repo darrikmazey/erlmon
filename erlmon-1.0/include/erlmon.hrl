@@ -26,3 +26,5 @@
 %% tcp port monitor
 -record(tcp_port_monitor, {host, port, pid}).
 
+%% process monitor
+-record(process_monitor, {name, pid}).

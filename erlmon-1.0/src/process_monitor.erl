@@ -4,11 +4,19 @@
 
 -export([start/1]).
 -export([init/1]).
+-export([monitor/1]).
+-export([unmonitor/1]).
 
 -include("include/erlmon.hrl").
 
+monitor(ProcessName) ->
+	process_monitor_man:monitor(ProcessName).
+
+unmonitor(ProcessName) ->
+	process_monitor_man:unmonitor(ProcessName).
+
 start(ProcessName) ->
-	spawn_link(?MODULE, init, [ProcessName]).
+	{ok, spawn_link(?MODULE, init, [ProcessName])}.
 
 init(Pid) when is_integer(Pid) ->
 	debug:log("process_monitor: starting for ~p", [Pid]),
@@ -34,7 +42,8 @@ init(ProcessName) ->
 
 loop(Pid, ProcessName, running) ->
 	receive
-		stop -> stopped
+		stop ->
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=process, obj=ProcessName, prev_state=running, new_state=unmonitored, ts=timestamp:now_i()})
 	after
 		3000 ->
 			Cpid = ps:pid_for_process(ProcessName),
@@ -51,7 +60,8 @@ loop(Pid, ProcessName, running) ->
 	end;
 loop(null, ProcessName, not_running) ->
 	receive
-		stop -> stopped
+		stop ->
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=process, obj=ProcessName, prev_state=not_running, new_state=unmonitored, ts=timestamp:now_i()})
 	after
 		3000 ->
 			Cpid = ps:pid_for_process(ProcessName),
@@ -65,7 +75,8 @@ loop(null, ProcessName, not_running) ->
 	end;
 loop(Pid, ProcessName, restarted) ->
 	receive
-		stop -> stopped
+		stop ->
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=process, obj=ProcessName, prev_state=restarted, new_state=unmonitored, ts=timestamp:now_i()})
 	after
 		3000 ->
 			Cpid = ps:pid_for_process(ProcessName),
