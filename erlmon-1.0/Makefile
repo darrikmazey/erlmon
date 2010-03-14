@@ -1,28 +1,13 @@
-ERL_LIB=/opt/local/lib/erlang/lib/erl_interface-3.6.4
-CFLAGS=-Wall -I/opt/local/include -I$(ERL_LIB)/include -I/opt/local/lib/erlang/usr/include -I /LuaLibrary/src
-LDFLAGS=-dynamic -bundle -undefined suppress -flat_namespace -L. -L$(ERL_LIB)/lib
-LDLIBS=
-STATICLIBS=$(ERL_LIB)/lib/libei.a $(ERL_LIB)/lib/liberl_interface.a /opt/local/lib/liblua.a
-GCC=/usr/bin/gcc
-ERL=/opt/local/bin/erl
 
-LIB=lib/liberlua.so
+OS = $(shell uname)
 
-ERLMODS=$(patsubst src/%.erl,ebin/%.beam,$(wildcard src/*.erl))
-OBJECTS=$(patsubst c_src/%.c,build/%.o,$(wildcard c_src/*.c))
+.PHONY: all clean test
 
-all: $(LIB) $(ERLMODS)
-
-build/%.o: c_src/%.c
-	$(GCC) $(CFLAGS) -o $@ -c $<
-
-ebin/%.beam: src/%.erl
-	$(ERL) -make
-
-$(LIB): $(OBJECTS)
-	$(GCC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $(LIB) $(OBJECTS) $(STATICLIBS)
+all:
+	$(MAKE) -f Makefile.$(OS)
 
 clean:
-	rm -f ebin/*.beam
-	rm -f build/*.o
-	rm -f lib/liberlua.so
+	$(MAKE) -f Makefile.$(OS) clean
+
+test:
+	$(MAKE) -f Makefile.$(OS) test
