@@ -13,6 +13,11 @@ function _add_monitors(host_monitors)
   host_monitors.add = function(mtype,name,init)
     -- create table if this is the first monitor of this type
     if mlist[mtype] == nil then mlist[mtype] = {} end
+
+    -- you don't have to name your monitors 
+    -- but we should probably hash them
+    if name == nil then name = tostring(#mlist[mtype]+1) end
+
     -- TODO - how do we handle the preexisting monitors? 
     mlist[mtype][name] = init
   end
