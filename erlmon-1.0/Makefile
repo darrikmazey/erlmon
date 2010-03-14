@@ -1,10 +1,10 @@
-ERL_LIB=/usr/lib/erlang/lib/erl_interface-3.6.3
-CFLAGS=-Wall -I/usr/local/include -I$(ERL_LIB)/include -I/usr/lib/erlang/usr/include
-LDFLAGS=-shared -L. -L$(ERL_LIB)/lib
-LDLIBS=-llua
-STATICLIBS=$(ERL_LIB)/lib/libei.a $(ERL_LIB)/lib/liberl_interface.a
+ERL_LIB=/opt/local/lib/erlang/lib/erl_interface-3.6.4
+CFLAGS=-Wall -I/opt/local/include -I$(ERL_LIB)/include -I/opt/local/lib/erlang/usr/include -I /LuaLibrary/src
+LDFLAGS=-dynamic -bundle -undefined suppress -flat_namespace -L. -L$(ERL_LIB)/lib
+LDLIBS=
+STATICLIBS=$(ERL_LIB)/lib/libei.a $(ERL_LIB)/lib/liberl_interface.a /opt/local/lib/liblua.a
 GCC=/usr/bin/gcc
-ERL=/usr/bin/erl
+ERL=/opt/local/bin/erl
 
 LIB=lib/liberlua.so
 
