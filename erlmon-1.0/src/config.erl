@@ -46,6 +46,7 @@ handle_call({reload,_ReloadType}, _From, State) ->
   debug:log("CONFIG: reloaded"),
   {reply, Reply, State};
 
+%% call lua authenticate method
 handle_call({authenticate, Login, Password}, _From, State) ->
   L = State#config_state.lua_state,
   lua:getfield(L, global, "authenticate"),
