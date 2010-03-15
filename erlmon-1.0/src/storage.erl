@@ -10,6 +10,7 @@
 -export([state_change/1]).
 
 -export([test/2]).
+-export([status/0]).
 
 -include("include/erlmon.hrl").
 
@@ -37,6 +38,10 @@ init() ->
 
 loop(State) ->
 	receive
+		{Sender, status} ->
+			debug:log("storage: received status request"),
+			Sender ! {ok, ok},
+			loop(State);
 		Msg = #state_change{} ->
 			debug:log("storage: received state_change"),
 			store(Msg),
@@ -109,3 +114,10 @@ state_change(Msg) ->
 store(Msg) ->
 	F = fun() -> mnesia:write(Msg) end,
 	mnesia:transaction(F).
+
+status() ->
+	storage ! {self(), status},
+	receive
+		{ok, Status} -> ok
+	end,
+	Status.
