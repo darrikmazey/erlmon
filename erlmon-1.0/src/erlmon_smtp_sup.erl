@@ -12,5 +12,5 @@ start_link() ->
 
 init(_) ->
 	debug:log("erlmon_smtp_sup: starting"),
-	GChild = {erlmon_smtp_gateway, {erlmon_smtp_gateway, start_link, []}, permanent, 2000, worker, [erlmon_smtp_gateway]},
+	GChild = {erlmon_smtp, {erlmon_smtp, start_link, []}, permanent, 2000, worker, [erlmon_smtp]},
 	{ok, {{one_for_one, 1, 1}, [GChild]}}.
