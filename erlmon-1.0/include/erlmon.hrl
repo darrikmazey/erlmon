@@ -14,12 +14,8 @@
 %% test_row
 -record(test, {key, value}).
 
-%% process
--record(process, {user, pid, cpu, mem, vsz, rss, tty, stat, start, time, cmd}).
-
-%% filesystem
--record(filesystem, {path, size, used, avail, percent, mount}).
-
+%% smtp_config
+-record(smtp_config, {authtype=login, host, user, pass}).
 
 %% --- monitor records --- %%
 
@@ -28,3 +24,10 @@
 
 %% process monitor
 -record(process_monitor, {name, pid}).
+
+%% filesystem
+-record(filesystem, {path, size, used, avail, percent, mount}).
+
+%% process
+-record(process, {user, pid, cpu, mem, vsz, rss, tty, stat, start, time, cmd}).
+
