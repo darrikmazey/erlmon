@@ -20,12 +20,7 @@ start(_Type, _StartArgs) ->
 
 init(_) ->
 	application:set_env(erlwww, port, 8000),
-	application:start(erlwww),
-	state_change_sup:start_link(),
-	wait_for_state_change_em(),
-	state_change_em:add_handler(state_change_handler),
-	state_change_em:add_handler(config_file_change_handler),
-	state_change_em:add_handler(node_down_handler).
+	application:start(erlwww).
 
 load() -> 
   file_monitor:monitor("config.lua"),
@@ -37,9 +32,3 @@ stop(_State) ->
 	debug:log("erlmon: stopping"),
 	ok.
 
-wait_for_state_change_em() ->
-	case whereis(state_change_em) of
-		undefined ->
-			wait_for_state_change_em();
-		_ -> ok
-	end.
