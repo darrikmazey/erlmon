@@ -5,6 +5,7 @@
 -export([start/0]).
 -export([init/0]).
 -export([monitor_node/1]).
+-export([status/0]).
 
 -include("include/erlmon.hrl").
 
@@ -21,6 +22,10 @@ init() ->
 
 loop(State) ->
 	receive
+		{Sender, _Status} ->
+			debug:log("node: received status request"),
+			Sender ! {ok, ok},
+			loop(State);
 		_Msg = #node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			start_monitoring_node(Node),
@@ -78,3 +83,10 @@ monitor_node(Node) ->
 		M ->
 			debug:log("node:UNKNOWN: ~p (~p)", [M, self()])
 	end.
+
+status() ->
+	node ! {self(), status},
+	receive
+		{ok, Status} -> ok
+	end,
+	Status.
