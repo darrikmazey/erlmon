@@ -30,6 +30,7 @@ loop(State) ->
 	end.
 
 monitor(Path) ->
+	wait_for_manager(),
 	?MODULE ! {start, Path},
 	ok.
 
@@ -56,3 +57,12 @@ stop_conditionally(Path, [Path|T]) ->
 	T;
 stop_conditionally(Path, [H|T]) ->
 	[H | stop_conditionally(Path, T)].
+
+wait_for_manager() ->
+	case whereis(file_monitor_man) of
+		undefined ->
+			wait_for_manager();
+		_ ->
+			ok
+	end.
+
