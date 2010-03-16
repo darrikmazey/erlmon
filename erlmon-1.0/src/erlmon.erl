@@ -23,6 +23,7 @@
 	process_monitor_sup,
 	process_monitor_man,
 	config_sup,
+	config,
 	erlmon_smtp_sup
 ]).
 

@@ -35,6 +35,7 @@ init([]) ->
   debug:log("CONFIG: init~n"),
   {ok,State} = lua:new_state(),
   debug:log("CONFIG: lua state initialized. ~n"),
+	erlmon:finished(?MODULE),
   {ok, #config_state{lua_state=State}}.
 
 %% reload config
