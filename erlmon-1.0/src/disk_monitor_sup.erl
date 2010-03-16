@@ -8,7 +8,9 @@
 -export([init/1]).
 
 start_link() ->
-	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+	R = supervisor:start_link({local, ?MODULE}, ?MODULE, []),
+	erlmon:finished(?MODULE),
+	R.
 
 init(_) ->
 	debug:log("disk_monitor_sup: starting"),

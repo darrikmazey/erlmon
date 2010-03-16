@@ -12,7 +12,9 @@
 
 start_link() ->
 	debug:log("state_change_em: starting"),
-	gen_event:start_link({local, ?SERVER}).
+	R = gen_event:start_link({local, ?SERVER}),
+	erlmon:finished(?MODULE),
+	R.
 
 add_handler(Module) ->
 	gen_event:add_handler(?SERVER, Module, []).

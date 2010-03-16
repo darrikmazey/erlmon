@@ -17,7 +17,9 @@ unmonitor(ProcessName) ->
 	supervisor:terminate_child(tcp_port_monitor_sup, [ProcessName]).
 
 start_link() ->
-	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+	R = supervisor:start_link({local, ?MODULE}, ?MODULE, []),
+	erlmon:finished(?MODULE),
+	R.
 
 init(_) ->
 	debug:log("process_monitor_sup: starting"),

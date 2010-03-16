@@ -12,6 +12,7 @@
 start_link() ->
 	debug:log("tcp_port_monitor_man: starting"),
 	register(?MODULE, Pid = spawn_link(?MODULE, init, [])),
+	erlmon:finished(?MODULE),
 	{ok, Pid}.
 
 init() ->

@@ -11,6 +11,7 @@
 start_link() ->
 	debug:log("file_monitor_man: starting"),
 	register(?MODULE, Pid = spawn_link(?MODULE, init, [])),
+	erlmon:finished(?MODULE),
 	{ok, Pid}.
 
 init() ->

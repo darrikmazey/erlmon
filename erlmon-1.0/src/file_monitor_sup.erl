@@ -16,7 +16,9 @@ unmonitor(Path) ->
 	supervisor:terminate_child(file_monitor_sup, [Path]).
 
 start_link() ->
-	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+	R = supervisor:start_link({local, ?MODULE}, ?MODULE, []),
+	erlmon:finished(?MODULE),
+	R.
 
 init(_) ->
 	debug:log("file_monitor_sup: starting"),

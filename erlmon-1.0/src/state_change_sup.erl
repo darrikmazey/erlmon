@@ -10,6 +10,7 @@
 start_link() ->
 	R = supervisor:start_link({local, ?MODULE}, ?MODULE, []),
 	wait_for_state_change_em(),
+	erlmon:finished(?MODULE),
 	R.
 
 

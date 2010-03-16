@@ -34,6 +34,7 @@ init() ->
 			debug:log("storage: we are first; initializing"),
 			init_storage(true)
 	end,
+	erlmon:finished(?MODULE),
 	loop([]).
 
 loop(State) ->

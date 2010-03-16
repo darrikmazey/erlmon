@@ -18,6 +18,7 @@ init() ->
 	State = net_adm:world(),
 	NewState = start_monitoring_nodes(State),
 	announce(NewState, NewState),
+	erlmon:finished(?MODULE),
 	loop(NewState).
 
 loop(State) ->
