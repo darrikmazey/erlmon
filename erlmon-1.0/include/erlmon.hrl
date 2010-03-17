@@ -6,6 +6,9 @@
 %% state change
 -record(state_change, {sender, node, objtype, obj, prev_state, new_state, data=none, ts}).
 
+%% sent alerts
+-record(sent_alert, {node, to, objtype, obj, prev_state, new_state, ets, ats}).
+
 %% state change filter
 -record(state_change_filter, {state_change, fields=[]}).
 

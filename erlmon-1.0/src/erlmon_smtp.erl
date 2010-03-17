@@ -24,7 +24,9 @@ loop({OldStatus, OldConfig}=State) ->
 		{alert, SC, To} ->
 			debug:log("erlmon_smtp: state_change alert: ~p", [SC]),
 			Msg = create_msg(OldConfig, SC, To),
-			send_msg(OldConfig, Msg, To);
+			send_msg(OldConfig, Msg, To),
+			storage:alert_sent(#sent_alert{node=node(), to=To, objtype=SC#state_change.objtype, obj=SC#state_change.obj, prev_state=SC#state_change.prev_state, new_state=SC#state_change.new_state, ets=SC#state_change.ts, ats=timestamp:now_i()}),
+			loop(State);
 		{Sender, status} ->
 			{Status, _Config} = State,
 			Sender ! {status, Status},

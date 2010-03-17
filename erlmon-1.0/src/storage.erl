@@ -8,6 +8,7 @@
 -export([announce/2]).
 
 -export([state_change/1]).
+-export([alert_sent/1]).
 
 -export([test/2]).
 -export([status/0]).
@@ -46,6 +47,10 @@ loop(State) ->
 		Msg = #state_change{} ->
 			debug:log("storage: received state_change"),
 			store(Msg),
+			loop(State);
+		#sent_alert{}=Alert ->
+			debug:log("storage: received sent_alert"),
+			store(Alert),
 			loop(State);
 		#storage_ack_announce{sender=Sender, node=Node} ->
 			debug:log("storage: received ACK announce from ~p on ~p", [Sender, Node]),
@@ -87,14 +92,16 @@ init_storage(true) ->
 
 create_tables() ->
 	mnesia:create_table(test, [{attributes, record_info(fields, test)}, {type, bag}, {ram_copies, [node()]}]),
-	mnesia:create_table(state_change, [{attributes, record_info(fields, state_change)}, {type, bag}, {ram_copies, [node()]}]).
+	mnesia:create_table(state_change, [{attributes, record_info(fields, state_change)}, {type, bag}, {ram_copies, [node()]}]),
+	mnesia:create_table(sent_alert, [{attributes, record_info(fields, sent_alert)}, {type, bag}, {ram_copies, [node()]}]).
 
 copy_tables(Node) ->
 	_R1 = mnesia:add_table_copy(test, Node, ram_copies),
-	_R2 = mnesia:add_table_copy(state_change, Node, ram_copies).
+	_R2 = mnesia:add_table_copy(state_change, Node, ram_copies),
+	_R3 = mnesia:add_table_copy(sent_alert, Node, ram_copies).
 
 wait_for_tables() ->
-	mnesia:wait_for_tables([test, state_change], 10000).
+	mnesia:wait_for_tables([test, state_change, sent_alert], 10000).
 	
 copy_storage_to_node(Node) ->
 	debug:log("storage: copying storage to ~p", [Node]),
@@ -110,6 +117,9 @@ test(K, V) ->
 	mnesia:transaction(F).
 
 state_change(Msg) ->
+	storage ! Msg.
+
+alert_sent(Msg) ->
 	storage ! Msg.
 
 store(Msg) ->
