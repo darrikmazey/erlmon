@@ -4,6 +4,8 @@
 
 -behaviour(application).
 
+-include("include/erlmon.hrl").
+
 -export([start/0, start/2, stop/1, finished/1]).
 
 -define(SUPERVISORS, [
@@ -41,6 +43,8 @@ start(_Type, _StartArgs) ->
 	R.
 
 load() -> 
+	SC = #smtp_config{host="mail.darmasoft.com", user="erlmon@darmasoft.com", pass="hYaF6Tak6R"},
+	erlmon_smtp:config(SC),
   file_monitor:monitor("config.lua"),
   config:reload(),
 	application:set_env(erlwww, port, 8000),

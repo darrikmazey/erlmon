@@ -6,6 +6,7 @@
 -export([init/0]).
 -export([status/0]).
 -export([config/1]).
+-export([alert/2]).
 
 -include("include/erlmon.hrl").
 
@@ -18,8 +19,12 @@ init() ->
 	state_change_em:notify(#state_change{sender=self(), node=node(), objtype=smtp, obj=self(), prev_state=down, new_state=disabled, ts=timestamp:now_i()}),
 	loop({disabled, nil}).
 
-loop({OldStatus, _OldConfig}=State) ->
+loop({OldStatus, OldConfig}=State) ->
 	receive
+		{alert, SC, To} ->
+			debug:log("erlmon_smtp: state_change alert: ~p", [SC]),
+			Msg = create_msg(OldConfig, SC, To),
+			send_msg(OldConfig, Msg, To);
 		{Sender, status} ->
 			{Status, _Config} = State,
 			Sender ! {status, Status},
@@ -34,6 +39,17 @@ loop({OldStatus, _OldConfig}=State) ->
 			debug:log("erlmon_smtp:UNKNOWN: ~p", [M]),
 			loop(State)
 	end.
+
+create_msg(Config, SC, To) ->
+	erlmon_smtp_message:create(Config, SC, To).
+
+send_msg(Config, Msg, To) ->
+	debug:log("erlmon_smtp: sending message: ~p", [Msg]),
+	{ok, Pid} = smtp_fsm:start(Config#smtp_config.host),
+	smtp_fsm:ehlo(Pid),
+	smtp_fsm:login_login(Pid, Config#smtp_config.user, Config#smtp_config.pass),
+	smtp_fsm:sendemail(Pid, Config#smtp_config.user, To, Msg),
+	smtp_fsm:close(Pid).
 
 config(Config) ->
 	erlmon_smtp ! {self(), config, Config},
@@ -79,3 +95,12 @@ find_primary_smtp() ->
 			{ok, secondary}
 	end.
 
+alert(#state_change{}=SC, To) ->
+	debug:log("erlmon_smtp: raising alert"),
+	case global:whereis_name(erlmon_smtp) of
+		undefined ->
+			{error, no_primary_smtp};
+		Pid ->
+			Pid ! {alert, SC, To},
+			ok
+	end.

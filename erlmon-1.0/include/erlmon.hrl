@@ -6,6 +6,12 @@
 %% state change
 -record(state_change, {sender, node, objtype, obj, prev_state, new_state, data=none, ts}).
 
+%% state change filter
+-record(state_change_filter, {state_change, fields=[]}).
+
+%% alert filter
+-record(alert_filter, {scf, to}).
+
 %% announce
 -record(storage_announce, {sender, node}).
 %% ack announce
