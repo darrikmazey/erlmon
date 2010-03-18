@@ -9,13 +9,15 @@ title() ->
 	"erlmon configuration".
 
 body() ->
-  case file:read_file("/home/darrik/wdir/erlmon/erlmon-1.0/config.lua") of
+  case file:read_file("config.lua") of
 		{ok, Config} ->
 			[
 				#h1{text="Configuration"},
 				#p{},
-				#label{text="Edit the configuration file for this node."},
-				#textarea { text=binary_to_list(Config), html_encode=false }
+				#label{text="Edit the configuration file for this node. Updates are applied immediately to all nodes."},
+				#textarea {id=config, text=binary_to_list(Config), html_encode=false },
+        #p{},
+        #button { text="Save Config", postback={click, save_button} }
 
 			];
 		{error, Reason} ->
@@ -28,4 +30,10 @@ body() ->
 
 menu_items() -> helper:menu([{home,"dashboard","/"},{nodes,"configuration","/web/config"}]).
 	
-event(_) -> ok.
+event(_) -> 
+  [Config] = wf:q(config),
+  config:update_file(Config),
+  helper:flash_msg("Config reloaded."),
+  wf:redirect("/web/config"),
+  ok.
+

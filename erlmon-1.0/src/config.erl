@@ -5,8 +5,10 @@
 -include("include/config.hrl").
 -include_lib("eunit/include/eunit.hrl").
 -define(SERVER, {global, ?MODULE}).
+-define(CONFIG_FILE, "config.lua").
 
 -export([start_link/0,
+         update_file/1,
          reload/0,
          authenticate/2]).
 
@@ -23,6 +25,9 @@
 reload() -> 
   debug:log("CONFIG:reload"),
   gen_server:call(config, {reload,event}).
+
+update_file(Content) -> 
+  file:write_file(?CONFIG_FILE,Content).
 
 authenticate(Login,Password) -> 
   debug:log("CONFIG:authenticating"),
@@ -42,7 +47,7 @@ init([]) ->
 handle_call({reload,_ReloadType}, _From, State) ->
   debug:log("CONFIG: loading lua file"),
   L = State#config_state.lua_state,
-  Reply = lua:dofile(L,"config.lua"),
+  Reply = lua:dofile(L,?CONFIG_FILE),
   debug:log("CONFIG: parsing erlmon table"),
   %%Config = lua:gettable(L,global,'Erlmon'),
   lua:dostring(L,"monitor_list = Erlmon.monitors.list"),
