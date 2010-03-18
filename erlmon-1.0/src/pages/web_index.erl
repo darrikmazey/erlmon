@@ -26,7 +26,10 @@ get_node_status() ->
 node_status_to_html([{Node, Status}|T]) ->
 	[
 		#p{},
-		#label{text=lists:flatten(io_lib:format("~p : ~p", [Node, Status]))}
+		#label{text=lists:flatten(io_lib:format("~s : ~s", [atom_to_list(Node), case Status of
+			up -> "UP";
+			down -> "DOWN";
+			_ -> "UNKNOWN" end]))}
 	| node_status_to_html(T)];
 node_status_to_html([]) ->
 	[].
