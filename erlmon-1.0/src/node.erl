@@ -25,12 +25,17 @@ loop(State) ->
 	receive
 		{Sender, _Status} ->
 			debug:log("node: received status request"),
-			Sender ! {ok, ok},
+			Sender ! {ok, State},
 			loop(State);
+		{node_status, Node, Status} ->
+			debug:log("node: received node_status: ~p:~p", [Node, Status]),
+			NewState = set_node_status(Node, Status, State),
+			loop(NewState);
 		_Msg = #node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			start_monitoring_node(Node),
-			loop(State);
+			NewState = set_node_status(Node, up, State),
+			loop(NewState);
 		M ->
 			debug:log("node:UNKNOWN: ~p", [M]),
 			loop(State)
@@ -80,10 +85,32 @@ monitor_node(Node) ->
 	receive
 		{nodedown, Node} ->
 			debug:log("node: received nodedown for ~p (~p)", [Node, self()]),
-			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=up, new_state=down, ts=timestamp:now_i()});
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=Node, prev_state=up, new_state=down, ts=timestamp:now_i()}),
+			node ! {node_status, Node, down};
 		M ->
 			debug:log("node:UNKNOWN: ~p (~p)", [M, self()])
 	end.
+
+add_node_to_state(Node, [Node|_T]=State) ->
+	State;
+add_node_to_state(Node, [H|T]) ->
+	[H|add_node_to_state(Node, T)];
+add_node_to_state(Node, []) ->
+	[Node].
+
+remove_node_from_state(Node, [Node|T]) ->
+	T;
+remove_node_from_state(Node, [H|T]) ->
+	[H|remove_node_from_state(Node, T)];
+remove_node_from_state(Node, []) ->
+	[].
+
+set_node_status(Node, Status, [{Node, _}|T]) ->
+	[{Node, Status}|T];
+set_node_status(Node, Status, [H|T]) ->
+	[H|set_node_status(Node, Status, T)];
+set_node_status(Node, Status, []) ->
+	[{Node, Status}].
 
 status() ->
 	node ! {self(), status},

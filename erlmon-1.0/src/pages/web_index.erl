@@ -9,8 +9,24 @@ title() ->
 	"erlmon home.".
 
 body() ->
-	#label{text="web_index body."}.
+	[
+		#h1{text="Node Status"},
+		get_node_status()
+	].
 
-menu_items() -> helper:menu([{home,"dashboard","/"},{nodes,"configuration","/web/config"}]).
+
+menu_items() -> helper:menu([{home,"dashboard","/"},{config,"configuration","/web/config"}]).
 	
 event(_) -> ok.
+
+get_node_status() ->
+	Nodes = node:status(),
+	node_status_to_html(Nodes).
+
+node_status_to_html([{Node, Status}|T]) ->
+	[
+		#p{},
+		#label{text=lists:flatten(io_lib:format("~p : ~p", [Node, Status]))}
+	| node_status_to_html(T)];
+node_status_to_html([]) ->
+	[].
