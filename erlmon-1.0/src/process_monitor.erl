@@ -6,8 +6,16 @@
 -export([init/1]).
 -export([monitor/1]).
 -export([unmonitor/1]).
+-export([status/0]).
+-export([status/1]).
 
 -include("include/erlmon.hrl").
+
+status() ->
+	process_monitor_man:status().
+
+status(_Pid) ->
+	{ok, running}.
 
 monitor(ProcessName) ->
 	process_monitor_man:monitor(ProcessName).

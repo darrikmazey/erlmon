@@ -6,6 +6,7 @@
 -export([init/0]).
 -export([monitor/1]).
 -export([unmonitor/1]).
+-export([status/0]).
 
 -include("include/erlmon.hrl").
 
@@ -20,8 +21,11 @@ init() ->
 
 loop(State) ->
 	receive
+		{Sender, status} ->
+			Sender ! {ok, State},
+			loop(State);
 	  {start, ProcessName} ->
-			NewState = [State|start_conditionally(ProcessName, State)],
+			NewState = start_conditionally(ProcessName, State),
 			loop(NewState);
 		{stop, ProcessName} ->
 			NewState = stop_conditionally(ProcessName, State),
@@ -30,6 +34,13 @@ loop(State) ->
 			debug:log("process_monitor_man: UNKNOWN: ~p", [M]),
 			loop(State)
 	end.
+
+status() ->
+	?MODULE ! {self(), status},
+	receive
+		{ok, Status} -> ok
+	end,
+	Status.
 
 monitor(ProcessName) ->
 	?MODULE ! {start, ProcessName},

@@ -6,8 +6,20 @@
 -export([init/1]).
 -export([monitor/2]).
 -export([unmonitor/2]).
+-export([status/0]).
+-export([status/1]).
 
 -include("include/erlmon.hrl").
+
+status() ->
+	tcp_port_monitor_man:status().
+
+status(Pid) ->
+	Pid ! {self(), status},
+	receive
+		{ok, Status} -> ok
+	end,
+	{ok, Status}.
 
 monitor(Host, Port) ->
 	tcp_port_monitor_man:monitor(Host, Port).
@@ -28,6 +40,9 @@ loop([Host, Port], State) ->
 	receive
 		stop ->
 			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=tcp_port, obj=ObjName, prev_state=State, new_state=unmonitored, ts=timestamp:now_i()});
+		{Sender, status} ->
+			Sender ! {ok, State},
+			loop([Host, Port], State);
 		M ->
 			debug:log("tcp_port_monitor: ~p: UNKNOWN: ~p", [self(), M])
 		after

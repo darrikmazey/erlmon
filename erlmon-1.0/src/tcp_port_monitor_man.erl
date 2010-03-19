@@ -6,6 +6,7 @@
 -export([init/0]).
 -export([monitor/2]).
 -export([unmonitor/2]).
+-export([status/0]).
 
 -include("include/erlmon.hrl").
 
@@ -20,8 +21,11 @@ init() ->
 
 loop(State) ->
 	receive
+		{Sender, status} ->
+			Sender ! {ok, State},
+			loop(State);
 	  {start, Host, Port} ->
-			NewState = [State|start_conditionally(Host, Port, State)],
+			NewState = start_conditionally(Host, Port, State),
 			loop(NewState);
 		{stop, Host, Port} ->
 			NewState = stop_conditionally(Host, Port, State),
@@ -39,13 +43,20 @@ unmonitor(Host, Port) ->
 	?MODULE ! {stop, Host, Port},
 	ok.
 
+status() ->
+	?MODULE ! {self(), status},
+	receive
+		{ok, Status} -> ok
+	end,
+	Status.
+
 start_conditionally(Host, Port, []) ->
 	debug:log("tcp_port_monitor_man: monitoring ~p:~p", [Host, Port]),
 	{ok, Pid} = tcp_port_monitor_sup:monitor(Host, Port),
 	[#tcp_port_monitor{host=Host, port=Port, pid=Pid}];
-start_conditionally(Host, Port, [H=#tcp_port_monitor{host=Host, port=Port}|T]) ->
+start_conditionally(Host, Port, [#tcp_port_monitor{host=Host, port=Port}|_T]=State) ->
 	debug:log("tcp_port_monitor_man: ~p:~p already monitored", [Host, Port]),
-	[H|T];
+	State;
 start_conditionally(Host, Port, [H|T]) ->
 	[H | start_conditionally(Host, Port, T)].
 

@@ -30,17 +30,17 @@ get_node_status() ->
 	]}.
 
 node_status_to_html([{Node, Status}|T]) ->
-	{Text, Class} = case Status of
+	{Text, Class, Cell} = case Status of
 		up ->
-			{"UP", "node_status_up"};
+			{"UP", "node_status_up", #tablecell { body=#link{ text=atom_to_list(Node), url=lists:flatten(io_lib:format("/web/node/~s", [atom_to_list(Node)]))}}};
 		down ->
-			{"DOWN", "node_status_down"};
+			{"DOWN", "node_status_down", #tablecell { text=atom_to_list(Node) }};
 		_ ->
-			{"UNKNOWN", "node_status_unknown"}
+			{"UNKNOWN", "node_status_unknown", #tablecell { text=atom_to_list(Node) }}
 	end,
 	[
 		#tablerow { cells = [
-			#tablecell { text=atom_to_list(Node) },
+			Cell,
 			#tablecell { text=Text, class=Class }
 		]}
 	| node_status_to_html(T)];
