@@ -11,3 +11,7 @@ clean:
 
 test:
 	$(MAKE) -f Makefile.$(OS) test
+
+runtests:
+	erl -pa ebin -s lua_test test -noshell -s init stop
+
