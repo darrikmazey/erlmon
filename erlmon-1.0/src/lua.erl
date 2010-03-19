@@ -100,6 +100,8 @@ getglobal(L, Name) ->
     command(L, {?ERL_LUA_GETGLOBAL, Name}),
     receive_simple_response().
 
+gettable(L, global, Name) when is_atom(Name) ->
+	gettable(L, global, atom_to_list(Name));
 gettable(L, global, Name) ->
 	getfield(L, global, Name),
 	{ok, T} = gettop(L),
