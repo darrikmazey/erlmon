@@ -29,20 +29,18 @@ monitor_status_table(Node) ->
 	]},
 	Rows = lists:flatten([
 		HeaderRow,
-		tcp_port_monitor_status_table(),
-		process_monitor_status_table()
+		tcp_port_monitor_status_table(NodeAtom),
+		process_monitor_status_table(NodeAtom)
 	]),
-	case {node(), NodeAtom} of
-		{NodeAtom, NodeAtom} ->
-			[
-				#table { rows=Rows }
-			];
-		{_, NodeAtom} ->
-			[]
-	end.
+	#table { rows=Rows }.
 
-tcp_port_monitor_status_table() ->
-	Status = tcp_port_monitor:status(),
+tcp_port_monitor_status_table(Node) ->
+	case {node(), Node} of
+		{Node, Node} ->
+			Status = tcp_port_monitor:status();
+		{_, Node} ->
+			Status = rpc:call(Node, tcp_port_monitor, status, [])
+	end,
 	tcp_port_monitor_status_rows(Status).
 
 tcp_port_monitor_status_rows([{ObjType,Host,Port,Pid}|T]) ->
@@ -60,8 +58,13 @@ tcp_port_monitor_status_rows([{ObjType,Host,Port,Pid}|T]) ->
 tcp_port_monitor_status_rows([]) ->
 	[].
 
-process_monitor_status_table() ->
-	Status = process_monitor:status(),
+process_monitor_status_table(Node) ->
+	case {node(), Node} of
+		{Node, Node} ->
+			Status = process_monitor:status();
+		{_, Node} ->
+			Status = rpc:call(Node, process_monitor, status, [])
+	end,
 	process_monitor_status_rows(Status).
 
 process_monitor_status_rows([{ObjType,ObjName,Pid}|T]) ->
