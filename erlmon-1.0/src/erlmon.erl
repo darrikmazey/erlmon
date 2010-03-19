@@ -22,6 +22,7 @@
 	tcp_port_monitor_man,
 	file_monitor_sup,
 	file_monitor_man,
+	process_list_sup,
 	process_monitor_sup,
 	process_monitor_man,
 	config_sup,

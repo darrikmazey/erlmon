@@ -33,7 +33,7 @@ create_record([]) -> [];
 create_record(Line) ->
 	Fields = re:split(Line, "\s+", [{return, list}]),
 	[User, Pid, Cpu, Mem, Vsz, Rss, Tty, Stat, Start, Time | Cmd] = Fields,
-	Rec = #process{user=User, pid=Pid, cpu=Cpu, mem=Mem, vsz=Vsz, rss=Rss, tty=Tty, stat=Stat, start=Start, time=Time, cmd=collapse(Cmd)},
+	Rec = #process{user=User, pid=list_to_integer(Pid), cpu=list_to_float(Cpu), mem=list_to_float(Mem), vsz=list_to_integer(Vsz), rss=list_to_integer(Rss), tty=Tty, stat=Stat, start=Start, time=Time, cmd=collapse(Cmd)},
 	Rec.
 
 dump([Process|T]) ->
