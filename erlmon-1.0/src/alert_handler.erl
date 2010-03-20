@@ -17,6 +17,7 @@
 -export([test/0]).
 -export([register_alert_filter/1]).
 -export([unregister_alert_filter/1]).
+-export([match_all_filter/1]).
 
 init(_) ->
 	{ok, []}.
@@ -101,3 +102,8 @@ handle_state_change(SC, []) ->
 	debug:log("alert_handler: ~p:~p (~p -> ~p) did not match any filters", [SC#state_change.objtype, SC#state_change.obj, SC#state_change.prev_state, SC#state_change.new_state]),
 	no_alert.
 
+match_all_filter(ToAddress) ->
+	SC = #state_change{sender=nil, node=nil, objtype=nil, obj=nil, prev_state=nil, new_state=nil, ts=nil},
+	SCF = #state_change_filter{state_change=SC, fields=[]},
+	AF = #alert_filter{scf=SCF, to=ToAddress}.
+	
