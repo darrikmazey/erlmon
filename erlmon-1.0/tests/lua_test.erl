@@ -57,3 +57,19 @@ push_to_helper(Val, Push, To) ->
     {ok, L} = lua:new_state(),
     ?assertMatch(ok, lua:Push(L, Val)),
     ?assertMatch({ok, Val}, lua:To(L, 1)).
+
+gettable_test() -> 
+    {ok, L} = lua:new_state(),
+    ?assertMatch(ok, lua:dostring(L, "t={a=1}")),
+    ?assertMatch([{"a",1}], lua:gettable(L, global,"t")).
+
+gettable_int_key_test() -> 
+    {ok, L} = lua:new_state(),
+    ?assertMatch(ok,lua:dostring(L, "t={};table.insert(t,'foo')")),
+    ?assertMatch([{1,"foo"}], lua:gettable(L, global,"t")).
+
+gettable_int_key_table_test() -> 
+    {ok, L} = lua:new_state(),
+    ?assertMatch(ok,lua:dostring(L, "t={};table.insert(t,{bar=1})")),
+    ?assertMatch([{1,[{"bar",1}]}], lua:gettable(L, global,"t")).
+

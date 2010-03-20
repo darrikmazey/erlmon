@@ -32,6 +32,10 @@ function _erlmon()
   -- Simple SMTP Alerting
   local alert = {}
   alert.email = ""
+  alert.host = "localhost"
+  alert.port = 25
+  alert.login = ""
+  alert.password = ""
 
   -- Globals
   local erlmon = {}

@@ -2,7 +2,7 @@ ERL_LIB=/opt/local/lib/erlang/lib/erl_interface-3.6.4
 CFLAGS=-Wall -I/opt/local/include -I$(ERL_LIB)/include -I/opt/local/lib/erlang/usr/include -I /LuaLibrary/src
 LDFLAGS=-dynamic -bundle -undefined suppress -flat_namespace -L. -L$(ERL_LIB)/lib
 LDLIBS=
-STATICLIBS=$(ERL_LIB)/lib/libei.a $(ERL_LIB)/lib/liberl_interface.a /opt/local/lib/liblua.a
+STATICLIBS=$(ERL_LIB)/lib/libei.a $(ERL_LIB)/lib/liberl_interface.a /usr/local/lib/liblua.a
 GCC=/usr/bin/gcc
 ERL=/opt/local/bin/erl
 
@@ -17,7 +17,7 @@ build/%.o: c_src/%.c
 	$(GCC) $(CFLAGS) -o $@ -c $<
 
 ebin/%.beam: src/%.erl
-	$(ERL) -make
+	$(ERL) +debug_info -make
 
 $(LIB): $(OBJECTS)
 	$(GCC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) -o $(LIB) $(OBJECTS) $(STATICLIBS)

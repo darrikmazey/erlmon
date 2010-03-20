@@ -13,5 +13,5 @@ test:
 	$(MAKE) -f Makefile.$(OS) test
 
 runtests:
-	erl -pa ebin -s lua_test test -noshell -s init stop
+	erlc tests/* && erl -pa ebin -s lua_test test -noshell -s init stop
 

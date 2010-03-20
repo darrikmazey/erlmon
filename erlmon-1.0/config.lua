@@ -6,3 +6,7 @@ require "lua/erlmon"
 -- this is where globals go
 Erlmon.http.login = 'admin'
 Erlmon.http.password = 'admin'
+
+monitor_port(11211)
+monitor_port(11212)
+monitor_port(11213)

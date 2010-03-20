@@ -7,7 +7,7 @@ require "lua/monitors/port"
 
 function _add_monitors(host_monitors)
 
-  local mlist = {} 
+  mlist = {} 
   host_monitors.list = mlist
 
   host_monitors.add = function(mtype,name,init)
@@ -16,10 +16,11 @@ function _add_monitors(host_monitors)
 
     -- you don't have to name your monitors 
     -- but we should probably hash them
-    if name == nil then name = tostring(#mlist[mtype]+1) end
-
-    -- TODO - how do we handle the preexisting monitors? 
-    mlist[mtype][name] = init
+    if name == nil then
+      table.insert(mlist[mtype],init)
+    else
+      mlist[mtype][name] = init
+    end
   end
 
   host_monitors.remove = function(mtype,name)

@@ -120,15 +120,29 @@ gettablekey(L, T) ->
 		T ->
 			[];
 		_ ->
+      %% values can be tables or anything else
+      %% recurse on tables
 			case type_atom(L, -1) of
 				{ok, table} ->
-					{ok, Key} = tolstring(L, -2),
+          %% keys can be strings or numbers
+          case type_atom(L, -2) of 
+            {ok, number} -> 
+              {ok, Key} = tonumber(L, -2);
+            _KT -> 
+              {ok, Key} = tolstring(L, -2)
+          end,
 					KV = {Key, gettable(L, T + 2)},
 					remove(L, -1),
 					[KV|gettablekey(L, T)];
 				_TA ->
 					{ok, _Type, Val} = pop(L),
-					{ok, Key} = tolstring(L, -1),
+          %% keys can be strings or numbers
+          case type_atom(L, -1) of 
+            {ok, number} -> 
+              {ok, Key} = tonumber(L, -1);
+            _KT -> 
+              {ok, Key} = tolstring(L, -1)
+          end,
 					[{Key, Val}|gettablekey(L, T)]
 		end
 	end.

@@ -48,15 +48,16 @@ handle_call({reload,_ReloadType}, _From, State) ->
   debug:log("CONFIG: loading lua file"),
   L = State#config_state.lua_state,
   Reply = lua:dofile(L,?CONFIG_FILE),
-  debug:log("CONFIG: parsing erlmon table"),
-  %%Config = lua:gettable(L,global,'Erlmon'),
-  lua:dostring(L,"monitor_list = Erlmon.monitors.list"),
-  %%lua:gettable(L,global,"monitor_list"),
-  List = [
-    ["tcp_port",["localhost",22]],
-    ["process",["/usr/sbin/sshd"]]
-  ],
-  apply_config_list(List),
+  Config = lua:gettable(L,global,"Erlmon"),
+
+  {"monitors",Methods} = lists:keyfind("monitors",1,Config),
+  {"list",Monitors} = lists:keyfind("list",1,Methods),
+  debug:log("CONFIG: Monitors: ~p", [Monitors]),
+  %%List = [
+  %%  ["tcp_port",["localhost",22]],
+  %%  ["process",["/usr/sbin/sshd"]]
+  %%],
+  apply_config_list(Monitors),
   debug:log("CONFIG: reloaded"),
   {reply, Reply, State};
 
@@ -93,9 +94,9 @@ apply_config_list(List) ->
 
 apply_monitors(Monitor) ->
   debug:log("Monitor ~p starting.",[Monitor]),
-	[MonType, Args] = Monitor,
-	Mod = list_to_atom(MonType ++ "_monitor"),
-	erlang:apply(Mod, monitor, Args),
+	%%[MonType, Args] = Monitor,
+	%%Mod = list_to_atom(MonType ++ "_monitor"),
+	%%erlang:apply(Mod, monitor, Args),
   ok.
 
 %% testcases
