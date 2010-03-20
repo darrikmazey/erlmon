@@ -11,6 +11,7 @@
          authenticate/2,
          reload/0,
          setting/1,
+         settings/0,
          start_link/0,
          update_file/1 ]).
 
@@ -37,6 +38,9 @@ authenticate(Login,Password) ->
 
 %% config settings can be accessed as:
 %% config:setting([smtp,auth,username]) => "bob"
+
+settings() -> 
+  gen_server:call(config,erlmon).
 
 setting(Type) when is_atom(Type) -> 
   setting([Type]);

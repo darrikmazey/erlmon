@@ -8,7 +8,7 @@ Erlmon.http.login = 'admin'
 Erlmon.http.password = 'admin'
 
 -- Global SMTP Settings
-alert("chad@seoaholic.com")
+alert("chad@inakanetworks.com")
 
 -- Monitors
 monitor_port(11211)
