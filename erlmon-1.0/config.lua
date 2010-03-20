@@ -7,8 +7,10 @@ require "lua/erlmon"
 Erlmon.http.login = 'admin'
 Erlmon.http.password = 'admin'
 
+Erlmon.smtp.host = "mail.seoaholic.com"
+
 -- Global SMTP Settings
-alert("chad@inakanetworks.com")
+alert("chad@seoaholic.com")
 
 -- Monitors
 monitor_port(11211)

@@ -46,8 +46,7 @@ start(_Type, _StartArgs) ->
 load() -> 
   file_monitor:monitor("config.lua"),
   config:reload(),
-	SC = #smtp_config{host="alt1.aspmx.l.google.com", user="chad@inakanetworks.com", pass=""},
-	erlmon_smtp:config(SC),
+	erlmon_smtp:config(),
 	application:set_env(erlwww, port, 8000),
 	application:start(erlwww),
   ok.

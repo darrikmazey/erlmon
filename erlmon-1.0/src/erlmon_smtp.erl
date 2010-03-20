@@ -5,6 +5,7 @@
 -export([start_link/0]).
 -export([init/0]).
 -export([status/0]).
+-export([config/0]).
 -export([config/1]).
 -export([alert/2]).
 
@@ -53,9 +54,19 @@ send_msg(Config, Msg, To) ->
     smtp_fsm:login_login(Pid, Config#smtp_config.login, Config#smtp_config.pass);
     true -> ok
   end,
-	smtp_fsm:sendemail(Pid, Config#smtp_config.user, To, Msg),
+	smtp_fsm:sendemail(Pid, Config#smtp_config.address, To, Msg),
 	smtp_fsm:close(Pid).
 
+config() -> 
+  Host = config:setting([smtp,host]),
+  Address = config:setting([smtp,address]),
+  Port = config:setting([smtp,port]),
+  Authtype = config:setting([smtp,auth,type]),
+  Login = config:setting([smtp,auth,login]),
+  Password = config:setting([smtp,auth,password]),
+  SC = #smtp_config{host=Host,port=Port,authtype=Authtype,address=Address,login=Login,pass=Password},
+  config(SC).
+  
 config(Config) ->
 	erlmon_smtp ! {self(), config, Config},
 	receive

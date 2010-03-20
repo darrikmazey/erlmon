@@ -8,6 +8,13 @@ main() ->
 title() ->
 	"erlmon configuration".
 
+alert_status() -> 
+  Address = config:setting([smtp,address]),
+  case length(Address) of
+    0 -> "no alert address set!";
+    _  -> ["alerts sent to " ++ Address]
+  end.
+
 body() ->
   case file:read_file("config.lua") of
 		{ok, Config} ->

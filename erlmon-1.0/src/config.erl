@@ -50,8 +50,12 @@ setting(Types) ->
   find_setting(Settings,Types).
 
 find_setting(Settings,[Type|Types]) -> 
-  {_Name,NewSettings} = lists:keyfind(atom_to_list(Type),1,Settings),
-  find_setting(NewSettings,Types);
+  Result = lists:keyfind(atom_to_list(Type),1,Settings),
+  case Result of
+    false -> 
+      Result;
+    {_Name,NewSettings} -> find_setting(NewSettings,Types)
+  end;
 
 find_setting(Settings,[]) -> 
   Settings.

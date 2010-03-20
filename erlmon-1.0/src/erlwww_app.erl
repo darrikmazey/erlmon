@@ -40,10 +40,8 @@ route(Path) -> nitrogen:route(Path).
 request(Module) ->
   case Module of
     login ->
-      debug:log("login request:~p",[wf:get_path_info()]),
       ok;
     _ -> 
-      debug:log("other request"),
       User = wf:user(),
       case User of
         undefined -> wf:redirect_to_login("/web/login");
