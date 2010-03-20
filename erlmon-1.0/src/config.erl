@@ -7,10 +7,12 @@
 -define(SERVER, {global, ?MODULE}).
 -define(CONFIG_FILE, "config.lua").
 
--export([start_link/0,
-         update_file/1,
+-export([
+         authenticate/2,
          reload/0,
-         authenticate/2]).
+         setting/1,
+         start_link/0,
+         update_file/1 ]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -33,6 +35,23 @@ authenticate(Login,Password) ->
   debug:log("CONFIG:authenticating"),
   gen_server:call(config, {authenticate, Login, Password}).
 
+%% config settings can be accessed as:
+%% config:setting([smtp,auth,username]) => "bob"
+
+setting(Type) when is_atom(Type) -> 
+  setting([Type]);
+
+setting(Types) -> 
+  Settings = gen_server:call(config,erlmon),
+  find_setting(Settings,Types).
+
+find_setting(Settings,[Type|Types]) -> 
+  {_Name,NewSettings} = lists:keyfind(atom_to_list(Type),1,Settings),
+  find_setting(NewSettings,Types);
+
+find_setting(Settings,[]) -> 
+  Settings.
+
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
@@ -44,22 +63,32 @@ init([]) ->
   {ok, #config_state{lua_state=State}}.
 
 %% reload config
-handle_call({reload,_ReloadType}, _From, State) ->
+handle_call({reload,_ReloadType}, _From, _State) ->
   debug:log("CONFIG: loading lua file"),
-  L = State#config_state.lua_state,
+  {ok, L} = lua:new_state(),
+  NewState = #config_state{lua_state=L},
   Reply = lua:dofile(L,?CONFIG_FILE),
-  Config = lua:gettable(L,global,"Erlmon"),
+  case Reply of
+    {error,_} -> 
+      debug:log("CONFIG: error in configuration file, NOT reloading.",[]),
+      {reply, Reply, _State};
+    _ -> 
+    Config = lua:gettable(L,global,"Erlmon"),
 
-  {"monitors",Methods} = lists:keyfind("monitors",1,Config),
-  {"list",Monitors} = lists:keyfind("list",1,Methods),
-  debug:log("CONFIG: Monitors: ~p", [Monitors]),
-  %%List = [
-  %%  ["tcp_port",["localhost",22]],
-  %%  ["process",["/usr/sbin/sshd"]]
-  %%],
-  apply_config_list(Monitors),
-  debug:log("CONFIG: reloaded"),
-  {reply, Reply, State};
+    {"monitors",Methods} = lists:keyfind("monitors",1,Config),
+    {"list",Monitors} = lists:keyfind("list",1,Methods),
+    apply_config_list(Monitors),
+    debug:log("CONFIG: reloaded"),
+    {reply, Reply, NewState}
+  end;
+
+handle_call(lua_state, _From, State) -> 
+  {reply,State#config_state.lua_state,State};
+
+handle_call(erlmon, _From, State) -> 
+  L = State#config_state.lua_state,
+  Reply = lua:gettable(L,global,"Erlmon"),
+  {reply,Reply,State};
 
 %% call lua authenticate method
 handle_call({authenticate, Login, Password}, _From, State) ->
@@ -89,14 +118,13 @@ code_change(_OldVsn, State, _Extra) ->
   {ok, State}.
 
 apply_config_list(List) -> 
-  lists:map(fun(Monitor) -> apply_monitors(Monitor) end,List),
+  lists:map(fun({Monitor,MonitorList}) -> apply_monitors(Monitor,MonitorList) end,List),
   ok.
 
-apply_monitors(Monitor) ->
-  debug:log("Monitor ~p starting.",[Monitor]),
-	%%[MonType, Args] = Monitor,
-	%%Mod = list_to_atom(MonType ++ "_monitor"),
-	%%erlang:apply(Mod, monitor, Args),
+apply_monitors(Monitor,MonitorList) ->
+  debug:log("CONFIG: Telling monitor ~p to start the following monitors: ~p ",[Monitor,MonitorList]),
+	Mod = list_to_atom(Monitor ++ "_monitor"),
+	erlang:apply(Mod, monitor, MonitorList),
   ok.
 
 %% testcases

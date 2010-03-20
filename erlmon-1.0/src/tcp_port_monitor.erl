@@ -4,7 +4,7 @@
 
 -export([start/2]).
 -export([init/1]).
--export([monitor/2]).
+-export([monitor/1,monitor/2]).
 -export([unmonitor/2]).
 -export([status/0]).
 -export([status/1]).
@@ -20,6 +20,14 @@ status(Pid) ->
 		{ok, Status} -> ok
 	end,
 	{ok, Status}.
+
+%% Config sends us, from Lua, something like:
+%% monitor([{"memcached",[{"host","localhost"},{"port",11211}]}]})
+monitor(Description) -> 
+  {_Name,Args} = Description,
+  {"host",Host} = lists:keyfind("host",1,Args),
+  {"port",Port} = lists:keyfind("port",1,Args),
+  monitor(Host,Port).
 
 monitor(Host, Port) ->
 	tcp_port_monitor_man:monitor(Host, Port).

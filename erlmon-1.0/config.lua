@@ -3,10 +3,13 @@
 -- test the file on the command line, by typing lua config.lua
 require "lua/erlmon"
 
--- this is where globals go
+-- Global Erlmon Settings
 Erlmon.http.login = 'admin'
 Erlmon.http.password = 'admin'
 
+-- Global SMTP Settings
+alert("chad@seoaholic.com")
+
+-- Monitors
 monitor_port(11211)
-monitor_port(11212)
-monitor_port(11213)
+

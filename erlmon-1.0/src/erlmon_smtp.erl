@@ -49,7 +49,10 @@ send_msg(Config, Msg, To) ->
 	debug:log("erlmon_smtp: sending message: ~p", [Msg]),
 	{ok, Pid} = smtp_fsm:start(Config#smtp_config.host),
 	smtp_fsm:ehlo(Pid),
-	smtp_fsm:login_login(Pid, Config#smtp_config.user, Config#smtp_config.pass),
+  if length(Config#smtp_config.login) > 0 -> 
+    smtp_fsm:login_login(Pid, Config#smtp_config.login, Config#smtp_config.pass);
+    true -> ok
+  end,
 	smtp_fsm:sendemail(Pid, Config#smtp_config.user, To, Msg),
 	smtp_fsm:close(Pid).
 

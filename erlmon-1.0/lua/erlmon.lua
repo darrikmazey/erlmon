@@ -3,6 +3,7 @@
 
 -- load monitors
 require "lua/monitors/monitors"
+require "lua/smtp"
 
 function _add_host(name)
   local host = {}
@@ -29,13 +30,6 @@ function _erlmon()
   local monitors = {}
   _add_monitors(monitors)
 
-  -- Simple SMTP Alerting
-  local alert = {}
-  alert.email = ""
-  alert.host = "localhost"
-  alert.port = 25
-  alert.login = ""
-  alert.password = ""
 
   -- Globals
   local erlmon = {}
@@ -44,6 +38,9 @@ function _erlmon()
   erlmon.alert = alert
   erlmon.add_host = _add_host
   erlmon.hosts = {}
+
+  -- Simple SMTP Alerting
+  _add_smtp(erlmon)
 
   return erlmon
 

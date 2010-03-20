@@ -58,7 +58,6 @@ handle_call(_Msg, _From, State) ->
 	{reply, Response, State}.
 
 handle_cast({refresh}, _State) ->
-	debug:log("process_list: refreshing"),
 	NewState = ps:list(),
 	{noreply, NewState};
 handle_cast(_Msg, State) ->

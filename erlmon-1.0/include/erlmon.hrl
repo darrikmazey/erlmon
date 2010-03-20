@@ -24,7 +24,7 @@
 -record(test, {key, value}).
 
 %% smtp_config
--record(smtp_config, {authtype=login, host, user, pass}).
+-record(smtp_config, {authtype=login, host, user, login, pass}).
 
 %% --- monitor records --- %%
 
