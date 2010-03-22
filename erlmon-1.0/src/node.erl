@@ -35,15 +35,23 @@ loop(State) ->
 			loop(NewState);
 		_Msg = #node_ack_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("node: received ack_announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
-			start_monitoring_node(Node),
-			NewState = set_node_status(Node, up, State),
-			loop(NewState);
+			case node_monitored(Node, State) of
+				true ->	ok;
+				false ->
+					start_monitoring_node(Node),
+					NewState = set_node_status(Node, up, State),
+					loop(NewState)
+			end;
 		_Msg = #node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
-			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
-			start_monitoring_node(Node),
-			NewState = set_node_status(Node, up, State),
-			Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State},
-			loop(NewState);
+			debug:log("node: received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
+			case node_monitored(Node, State) of
+				true -> ok;
+				false ->
+					start_monitoring_node(Node),
+					NewState = set_node_status(Node, up, State),
+					Pid ! #node_ack_announce{sender=self(), pid=self(), node=node(), state=State},
+					loop(NewState)
+			end;
 		M ->
 			debug:log("node:UNKNOWN: ~p", [M]),
 			loop(State)
@@ -79,7 +87,8 @@ announce([{Node, up}|T], State) ->
 			announce(T, State);
 		true ->
 			debug:log("node: not announcing to self"),
-			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=node(), prev_state=down, new_state=up, ts=timestamp:now_i()})
+			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=node(), prev_state=down, new_state=up, ts=timestamp:now_i()}),
+			announce(T, State)
 	end;
 announce([], _State) ->
 	[].
@@ -113,6 +122,15 @@ monitor_node(Node) ->
 %	[H|remove_node_from_state(Node, T)];
 %remove_node_from_state(Node, []) ->
 %	[].
+
+node_monitored(Node, [{Node, _}|_T]) ->
+	debug:log("node: node (~p) already monitored!", [Node]),
+	true;
+node_monitored(Node, [_H|T]) ->
+	node_monitored(Node, T);
+node_monitored(Node, []) ->
+	debug:log("node: node (~p) not monitored yet", [Node]),
+	false.
 
 set_node_status(Node, Status, [{Node, _}|T]) ->
 	[{Node, Status}|T];
