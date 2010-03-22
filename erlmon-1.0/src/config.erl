@@ -132,7 +132,7 @@ apply_config_list(List) ->
 apply_monitors(Monitor,MonitorList) ->
   debug:log("CONFIG: Telling monitor ~p to start the following monitors: ~p ",[Monitor,MonitorList]),
 	Mod = list_to_atom(Monitor ++ "_monitor"),
-	erlang:apply(Mod, monitor, MonitorList),
+	erlang:apply(Mod, monitor, [MonitorList]),
   ok.
 
 %% testcases

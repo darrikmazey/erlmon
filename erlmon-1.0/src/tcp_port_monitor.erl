@@ -23,11 +23,14 @@ status(Pid) ->
 
 %% Config sends us, from Lua, something like:
 %% monitor([{"memcached",[{"host","localhost"},{"port",11211}]}]})
-monitor(Description) -> 
+monitor([]) ->
+	[];
+monitor([Description|T]) -> 
   {_Name,Args} = Description,
   {"host",Host} = lists:keyfind("host",1,Args),
   {"port",Port} = lists:keyfind("port",1,Args),
-  monitor(Host,Port).
+  monitor(Host,Port),
+	monitor(T).
 
 monitor(Host, Port) ->
 	tcp_port_monitor_man:monitor(Host, Port).
