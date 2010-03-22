@@ -16,7 +16,7 @@ init(_) ->
 handle_event(#state_change{objtype=node, new_state=down}=Event, State) ->
 	debug:log("node_down_handler: ~p", [Event]),
 	{ok, State};
-handle_event(Event, State) ->
+handle_event(_Event, State) ->
 	{ok, State}.
 
 terminate(_Args, _State) ->

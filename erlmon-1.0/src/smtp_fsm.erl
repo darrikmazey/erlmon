@@ -84,7 +84,7 @@
 getFQDN()->
     {ok, Hostname} = inet:gethostname(),
     {ok, HostEnt} = inet:gethostbyname(Hostname),
-    {hostent,Fqdn,_,inet,_,IP_addrs} = HostEnt,
+    {hostent,Fqdn,_,inet,_,_IP_addrs} = HostEnt,
     Fqdn.
 
 %% encodes user & password as required by PLAIN AUTH method
@@ -127,7 +127,7 @@ pref_auth([H|T], Supports) ->
 	true  -> {ok, H};
 	false -> pref_auth(T,Supports)
     end;
-pref_auth([], Supports) ->
+pref_auth([], _Supports) ->
     {error, none}.
 
 %% checks Features list if AUTH is supported and returns 
@@ -295,7 +295,7 @@ init([Server,Port]) ->
 
 %% state=smtp_start after connection but before we've sent
 %% helo or ehlo
-smtp_start({helo, Name}, Pid, Info)->
+smtp_start({helo, Name}, _Pid, Info)->
     Msg = ["helo ", Name, "\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
     case get_response(Info#info.socket) of
@@ -306,7 +306,7 @@ smtp_start({helo, Name}, Pid, Info)->
 	_Error -> 
 	    {stop, conn_error, conn_error, []}
     end;
-smtp_start({ehlo, Name}, Pid, Info) ->
+smtp_start({ehlo, Name}, _Pid, Info) ->
     Msg = ["ehlo ", Name, "\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
     case get_response(Info#info.socket) of
@@ -323,7 +323,7 @@ smtp_start({ehlo, Name}, Pid, Info) ->
 
 %% state=smtp_conn - we can now send emails, login etc.
 %%
-smtp_conn(noop, Pid, Info) ->
+smtp_conn(noop, _Pid, Info) ->
     ok = gen_tcp:send(Info#info.socket, "noop\r\n"),
     case get_response(Info#info.socket) of
 	{"250", Resp} -> 
@@ -333,7 +333,7 @@ smtp_conn(noop, Pid, Info) ->
 	Error -> 
 	    {stop, conn_error, {conn_error, Error}, []}
     end;
-smtp_conn({mfrom, Address}, Pid, Info) ->
+smtp_conn({mfrom, Address}, _Pid, Info) ->
     Msg = ["mail from:", Address, "\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
     case get_response(Info#info.socket) of
@@ -344,7 +344,7 @@ smtp_conn({mfrom, Address}, Pid, Info) ->
 	Error -> 
 	    {stop, conn_error, {conn_error, Error}, []}
     end;
-smtp_conn({rcpt_to, Address}, Pid, Info) ->
+smtp_conn({rcpt_to, Address}, _Pid, Info) ->
     Msg = ["rcpt to:", Address, "\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
     case get_response(Info#info.socket) of
@@ -355,7 +355,7 @@ smtp_conn({rcpt_to, Address}, Pid, Info) ->
 	Error -> 
 	    {stop, conn_error, {conn_error, Error}, []}
     end;
-smtp_conn(data, Pid, Info) ->
+smtp_conn(data, _Pid, Info) ->
     ok = gen_tcp:send(Info#info.socket, "Data\r\n"),
     case get_response(Info#info.socket) of
 	{"354", Resp} -> 
@@ -365,7 +365,7 @@ smtp_conn(data, Pid, Info) ->
 	Resp -> 
 	    {stop, conn_error, {conn_error, Resp}, []}
     end;
-smtp_conn({plain_login,User,Pwd}, Pid, Info) ->
+smtp_conn({plain_login,User,Pwd}, _Pid, Info) ->
     Msg =  ["AUTH PLAIN ", plain_encode(User,Pwd), "\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
     case get_response(Info#info.socket) of
@@ -376,7 +376,7 @@ smtp_conn({plain_login,User,Pwd}, Pid, Info) ->
 	Error -> 
 	    {stop, conn_error, {conn_error, Error}, []}
     end;
-smtp_conn({login_login,User}, Pid, Info) ->
+smtp_conn({login_login,User}, _Pid, Info) ->
     B64Usr =  base64:encode(User),
     Msg = ["AUTH LOGIN ", B64Usr, "\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
@@ -388,9 +388,9 @@ smtp_conn({login_login,User}, Pid, Info) ->
 	Error -> 
 	    {stop, conn_error, {conn_error, Error}, []}
     end;
-smtp_conn(features, Pid, Info) ->
+smtp_conn(features, _Pid, Info) ->
     {reply, {ok,Info#info.features}, smtp_conn, Info};
-smtp_conn(md5_login, Pid, Info) ->
+smtp_conn(md5_login, _Pid, Info) ->
     ok = gen_tcp:send(Info#info.socket,"AUTH CRAM-MD5\r\n"),
     case get_response(Info#info.socket) of
 	{"334", Resp} -> 
@@ -402,7 +402,7 @@ smtp_conn(md5_login, Pid, Info) ->
     end.
 
 %% state used in md5 authentication
-smtp_md5({md5_send, User, Md5_hmac}, Pid, Info) ->
+smtp_md5({md5_send, User, Md5_hmac}, _Pid, Info) ->
     Md5Usr = base64:encode(User++" "++Md5_hmac),
     ok = gen_tcp:send(Info#info.socket, [Md5Usr,"\r\n"]),
     case get_response(Info#info.socket) of
@@ -416,13 +416,13 @@ smtp_md5({md5_send, User, Md5_hmac}, Pid, Info) ->
 
 %% state used in sending data, it's after data has been sent,
 %% but before the message has been sent
-smtp_data({msg,Message}, Pid, Info) ->
+smtp_data({msg,Message}, _Pid, Info) ->
     Msg = [Message, "\r\n.\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
     case get_response(Info#info.socket) of
 	{"250", Resp} -> 
 	    {reply, {ok, Resp}, smtp_conn, Info};
-	{Code, Resp} -> 
+	{_Code, Resp} -> 
 	    {reply, {data_error, Resp}, smtp_conn, Info};
 	Error -> 
 	    {stop, conn_error, {conn_error, Error}, []}
@@ -430,13 +430,13 @@ smtp_data({msg,Message}, Pid, Info) ->
 
 %% state used in login, it's after the username has been sent, 
 %% but before the password has been sent.
-smtp_login({login_pass,Pwd}, Pid, Info) ->
+smtp_login({login_pass,Pwd}, _Pid, Info) ->
     Msg = [base64:encode(Pwd), "\r\n"],
     ok = gen_tcp:send(Info#info.socket, Msg),
     case get_response(Info#info.socket) of
 	{"235", Resp} -> 
 	    {reply, {ok, Resp}, smtp_conn, Info};
-	{Code, Resp} -> 
+	{_Code, Resp} -> 
 	    {reply, {auth_error, Resp}, smtp_conn, Info};
 	Resp -> 
 	    {stop, conn_error, {conn_error, Resp}, []}
@@ -444,7 +444,7 @@ smtp_login({login_pass,Pwd}, Pid, Info) ->
 
 %% non-specific callbacks
 
-handle_sync_event(rset, Pid, AnyState, Info) ->
+handle_sync_event(rset, _Pid, _AnyState, Info) ->
     ok = gen_tcp:send(Info#info.socket, "rset\r\n"),
     case get_response(Info#info.socket) of
 	{"250", Resp} -> 
@@ -455,10 +455,10 @@ handle_sync_event(rset, Pid, AnyState, Info) ->
 	    {stop, conn_error, {conn_error, Error}, []}
     end.
 
-handle_event(close, AnyState, Info) ->
+handle_event(close, _AnyState, Info) ->
     ok = gen_tcp:send(Info#info.socket, "quit\r\n"),
     {stop, i_have_quit, []}.
 
-terminate(Reason,StateName,StateData) -> 
+terminate(Reason,_StateName,_StateData) -> 
     {terminated, Reason}.
 

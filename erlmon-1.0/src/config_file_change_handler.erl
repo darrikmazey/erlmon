@@ -17,7 +17,7 @@ handle_event(#state_change{objtype=file, obj="config.lua", new_state=file_ctime_
 	debug:log("CONFIG FILE CHANGED: ~p", [Event]),
   config:reload(),
 	{ok, State};
-handle_event(Event, State) ->
+handle_event(_Event, State) ->
 	{ok, State}.
 
 terminate(_Args, _State) ->

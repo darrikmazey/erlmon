@@ -91,19 +91,19 @@ monitor_node(Node) ->
 			debug:log("node:UNKNOWN: ~p (~p)", [M, self()])
 	end.
 
-add_node_to_state(Node, [Node|_T]=State) ->
-	State;
-add_node_to_state(Node, [H|T]) ->
-	[H|add_node_to_state(Node, T)];
-add_node_to_state(Node, []) ->
-	[Node].
-
-remove_node_from_state(Node, [Node|T]) ->
-	T;
-remove_node_from_state(Node, [H|T]) ->
-	[H|remove_node_from_state(Node, T)];
-remove_node_from_state(Node, []) ->
-	[].
+%add_node_to_state(Node, [Node|_T]=State) ->
+%	State;
+%add_node_to_state(Node, [H|T]) ->
+%	[H|add_node_to_state(Node, T)];
+%add_node_to_state(Node, []) ->
+%	[Node].
+%
+%remove_node_from_state(Node, [Node|T]) ->
+%	T;
+%remove_node_from_state(Node, [H|T]) ->
+%	[H|remove_node_from_state(Node, T)];
+%remove_node_from_state(Node, []) ->
+%	[].
 
 set_node_status(Node, Status, [{Node, _}|T]) ->
 	[{Node, Status}|T];

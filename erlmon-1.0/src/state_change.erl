@@ -25,58 +25,58 @@ match_fields(#state_change{}, #state_change{}, []) ->
 
 match_field(#state_change{}=SCA, #state_change{}=SCB, sender) ->
 	case {SCA#state_change.sender, SCB#state_change.sender} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}=SCA, #state_change{}=SCB, node) ->
 	case {SCA#state_change.node, SCB#state_change.node} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}=SCA, #state_change{}=SCB, objtype) ->
 	case {SCA#state_change.objtype, SCB#state_change.objtype} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}=SCA, #state_change{}=SCB, obj) ->
 	case {SCA#state_change.obj, SCB#state_change.obj} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}=SCA, #state_change{}=SCB, prev_state) ->
 	case {SCA#state_change.prev_state, SCB#state_change.prev_state} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}=SCA, #state_change{}=SCB, new_state) ->
 	case {SCA#state_change.new_state, SCB#state_change.new_state} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}=SCA, #state_change{}=SCB, data) ->
 	case {SCA#state_change.data, SCB#state_change.data} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}=SCA, #state_change{}=SCB, ts) ->
 	case {SCA#state_change.ts, SCB#state_change.ts} of
-		{A, A} ->
+		{_A, _A} ->
 			true;
-		{A, B} ->
+		{_A, _B} ->
 			false
 	end;
 match_field(#state_change{}, #state_change{}, _Field) ->

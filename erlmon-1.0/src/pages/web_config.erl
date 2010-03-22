@@ -27,7 +27,7 @@ body() ->
         #button { text="Save Config", postback={click, save_button} }
 
 			];
-		{error, Reason} ->
+		{error, _Reason} ->
 			[
 				#h1{text="Configuration"},
 				#p{},
