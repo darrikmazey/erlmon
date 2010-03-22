@@ -125,7 +125,7 @@ monitor_node(Node) ->
 %remove_node_from_state(Node, []) ->
 %	[].
 
-node_monitored(Node, [{Node, _}|_T]) ->
+node_monitored(Node, [{Node, up}|_T]) ->
 	debug:log("node: node (~p) already monitored!", [Node]),
 	true;
 node_monitored(Node, [_H|T]) ->
