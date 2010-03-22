@@ -16,7 +16,9 @@ start() ->
 init() ->
 	debug:log("node: initializing"),
 	State = net_adm:world(),
+	debug:log("node: initial state: ~p", [State]),
 	NewState = start_monitoring_nodes(State),
+	debug:log("node: final state: ~p", [NewState]),
 	announce(NewState, NewState),
 	erlmon:finished(?MODULE),
 	loop(NewState).
@@ -31,10 +33,15 @@ loop(State) ->
 			debug:log("node: received node_status: ~p:~p", [Node, Status]),
 			NewState = set_node_status(Node, Status, State),
 			loop(NewState);
+		_Msg = #node_ack_announce{sender=_Sender, pid=_Pid, node=Node, state=_TheirState} ->
+			start_monitoring_node(Node),
+			NewState = set_node_status(Node, up, State),
+			loop(NewState);
 		_Msg = #node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			start_monitoring_node(Node),
 			NewState = set_node_status(Node, up, State),
+			Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State},
 			loop(NewState);
 		M ->
 			debug:log("node:UNKNOWN: ~p", [M]),

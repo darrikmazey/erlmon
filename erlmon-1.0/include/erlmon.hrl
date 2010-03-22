@@ -1,6 +1,8 @@
 
 %% announce
 -record(node_announce, {sender, pid, node, state}).
+%% ack announce
+-record(node_ack_announce, {sender, pid, node, state}).
 
 
 %% state change
