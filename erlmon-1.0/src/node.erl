@@ -33,7 +33,8 @@ loop(State) ->
 			debug:log("node: received node_status: ~p:~p", [Node, Status]),
 			NewState = set_node_status(Node, Status, State),
 			loop(NewState);
-		_Msg = #node_ack_announce{sender=_Sender, pid=_Pid, node=Node, state=_TheirState} ->
+		_Msg = #node_ack_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
+			debug:log("node: received ack_announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			start_monitoring_node(Node),
 			NewState = set_node_status(Node, up, State),
 			loop(NewState);
@@ -64,6 +65,7 @@ start_monitoring_node(Node) ->
 	end.
 
 announce([{Node, up}|T], State) ->
+	debug:log("node: announce(~p)", [Node]),
 	case Node == node() of
 		false ->
 			Pid = find_node_pid(Node),
@@ -71,12 +73,12 @@ announce([{Node, up}|T], State) ->
 				undefined ->
 					debug:log("can not announce to node ~p: undefined Pid", [Node]);
 				_ ->
-				debug:log("announcing to ~p on ~p", [Pid, Node]),
+				debug:log("node: announcing to ~p on ~p", [Pid, Node]),
 				Pid ! #node_announce{sender=self(), pid=self(), node=node(), state=State}
 			end,
 			announce(T, State);
 		true ->
-			debug:log("not announcing to self"),
+			debug:log("node: not announcing to self"),
 			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=?MODULE, obj=node(), prev_state=down, new_state=up, ts=timestamp:now_i()})
 	end;
 announce([], _State) ->
