@@ -36,22 +36,24 @@ loop(State) ->
 		_Msg = #node_ack_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("node: received ack_announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			case node_monitored(Node, State) of
-				true ->	ok;
+				true ->	
+					NewState = State;
 				false ->
 					start_monitoring_node(Node),
-					NewState = set_node_status(Node, up, State),
-					loop(NewState)
-			end;
+					NewState = set_node_status(Node, up, State)
+			end,
+			loop(NewState);
 		_Msg = #node_announce{sender=_Sender, pid=Pid, node=Node, state=TheirState} ->
 			debug:log("node: received announce for ~p on ~p~n~p", [Pid, Node, TheirState]),
 			case node_monitored(Node, State) of
-				true -> ok;
+				true ->
+					NewState = State;
 				false ->
 					start_monitoring_node(Node),
 					NewState = set_node_status(Node, up, State),
-					Pid ! #node_ack_announce{sender=self(), pid=self(), node=node(), state=State},
-					loop(NewState)
-			end;
+					Pid ! #node_ack_announce{sender=self(), pid=self(), node=node(), state=State}
+			end,
+			loop(NewState);
 		M ->
 			debug:log("node:UNKNOWN: ~p", [M]),
 			loop(State)
