@@ -21,6 +21,8 @@ function _add_monitors(host_monitors)
     else
       mlist[mtype][name] = init
     end
+
+    return init
   end
 
   host_monitors.remove = function(mtype,name)
