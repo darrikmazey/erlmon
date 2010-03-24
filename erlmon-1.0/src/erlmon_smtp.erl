@@ -5,6 +5,7 @@
 -export([start_link/0]).
 -export([init/0]).
 -export([status/0]).
+-export([get_config/0]).
 -export([config/0]).
 -export([config/1]).
 -export([alert/2]).
@@ -22,6 +23,9 @@ init() ->
 
 loop({OldStatus, OldConfig}=State) ->
 	receive
+		{Sender, get_config} ->
+			Sender ! {ok, OldConfig},
+			loop({OldStatus, OldConfig});
 		{alert, SC, To} ->
 			debug:log("erlmon_smtp: state_change alert: ~p", [SC]),
 			Msg = create_msg(OldConfig, SC, To),
@@ -60,6 +64,12 @@ send_msg(Config, Msg, To) ->
   end,
 	smtp_fsm:sendemail(Pid, Config#smtp_config.address, To, Msg),
 	smtp_fsm:close(Pid).
+
+get_config() ->
+	erlmon_smtp ! {self(), get_config},
+	receive
+		{ok, Config} -> Config
+	end.
 
 config() -> 
   Host = config:setting([smtp,host]),
@@ -106,6 +116,7 @@ find_primary_smtp() ->
 					{ok, primary};
 				no ->
 					debug:log("erlmon_smtp: failed to become primary gateway"),
+					erlang:monitor(process, global:whereis_name(erlmon_smtp)),
 					{ok, enabled}
 			end;
 		Pid ->
