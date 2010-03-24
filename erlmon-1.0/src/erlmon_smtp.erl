@@ -38,6 +38,10 @@ loop({OldStatus, OldConfig}=State) ->
 			Sender ! {ok, NewStatus},
 			state_change_em:notify(#state_change{sender=self(), node=node(), objtype=smtp, obj=self(), prev_state=OldStatus, new_state=NewStatus, ts=timestamp:now_i()}),
 			loop({NewStatus, NewConfig});
+		{'DOWN', _Ref, _Type, _Pid, _Reason} ->
+			debug:log("erlmon_smtp: lost primary gateway"),
+			{ok, NewStatus} = find_primary_smtp(),
+			loop({NewStatus, OldConfig});
 		M ->
 			debug:log("erlmon_smtp:UNKNOWN: ~p", [M]),
 			loop(State)
